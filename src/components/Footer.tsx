@@ -103,7 +103,7 @@ export default function Footer() {
         <div className="flex-grow flex items-center justify-center w-full min-h-[300px] pointer-events-none" />
 
         {/* BOTTOM SECTION: GIGANTIC FULL-SCREEN WIDTH WORDMARK */}
-        <div className="w-full relative z-10 select-none pb-12 sm:pb-16 md:pb-24">
+        <div className="w-full relative z-10 select-none pb-10 sm:pb-8 md:pb-6">
 
           <div className="w-full flex justify-center items-end border-t border-white/[0.04] pt-8">
             <h2 className="w-full text-center font-serif font-light text-[12.5vw] xs:text-[12.5vw] md:text-[13vw] tracking-tighter leading-[1.1] flex items-baseline justify-center select-none text-white transition-all duration-500 hover:scale-[1.01] origin-bottom filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)] mb-4 sm:mb-8 md:mb-6">
