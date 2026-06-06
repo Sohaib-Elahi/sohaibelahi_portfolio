@@ -109,7 +109,7 @@ export default function AboutSection() {
           <div className="relative w-full overflow-hidden aspect-[3/4] bg-black rounded-[2rem] border border-zinc-900/40 z-10">
             {/* Displaying original high-fidelity uploaded portrait with selective red-lighting */}
             <motion.img
-              src="../src/assets/images/me.png"
+              src="src/assets/images/me/me.webp"
               alt="Sohaib Elahi Portrait"
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover rounded-[2rem] transition-transform duration-1000 ease-out group-hover:scale-105"
