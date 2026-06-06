@@ -69,9 +69,7 @@ export default function MarketingFeaturesSection() {
             className="text-xl sm:text-[25px] md:text-[29px] text-zinc-100 font-serif font-light leading-relaxed tracking-wide text-center"
             style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6)" }}
           >
-            Hi, I am Sohaib Elahi, a design-centric creative developer trusted by{" "}
-            <strong className="font-semibold text-white">international brands</strong> and{" "}
-            <strong className="font-semibold text-white">eCommerce stores</strong> worldwide. I design digital tools, high-converting emails, and brand systems with world-class user experience.{" "}
+            Hi, I'm Sohaib Elahi. I turn brands into experiences. <br />With 6+ years designing for international eCommerce stores, Amazon brands, and digital-first businesses, I create visual identities, email campaigns, and marketing systems that convert browsers into buyers.{" "}
             <span className="inline-block align-middle ml-1">
               <a
                 href="mailto:sohaib.e0912003@gmail.com?subject=Project Inquiry"
