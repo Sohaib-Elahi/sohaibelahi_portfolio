@@ -1,9 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Geist:wght@100;200;300;400;500;600;700&display=swap');
-
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Apple Garamond";
+  src: url('../src/font/apple garamond/AppleGaramond-Light.ttf');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Apple Garamond Italic";
+  src: url('../src/font/apple garamond/AppleGaramond-LightItalic.ttf');
+  font-weight: 400;
+  font-style: italic;
+}
+
 @theme {
-  --font-serif: "Apple Garamond", "Cormorant Garamond", Georgia, serif;
+  --font-serif: "Apple Garamond";
   --font-sans: "Geist", "Inter", sans-serif;
 
 
@@ -35,8 +48,8 @@
   mix-blend-mode: screen;
   transform: translate(-50%, -50%);
   transition: width 0.22s ease-out,
-              height 0.22s ease-out,
-              background-color 0.22s ease;
+    height 0.22s ease-out,
+    background-color 0.22s ease;
 }
 
 .custom-cursor-dot.cursor-expand {
@@ -56,9 +69,9 @@
   mix-blend-mode: screen;
   transform: translate(-50%, -50%);
   transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.35s ease,
-              background-color 0.35s ease;
+    height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease,
+    background-color 0.35s ease;
 }
 
 .custom-cursor-ring.cursor-expand {
@@ -66,11 +79,13 @@
   height: 44px;
   border-color: #c9362e;
   background-color: rgba(201, 54, 46, 0.05);
-  box-shadow: none; /* Glow entirely removed */
+  box-shadow: none;
+  /* Glow entirely removed */
 }
 
 /* Fluid mouse interaction pointer-hider */
 @media (pointer: fine) {
+
   .custom-cursor-active,
   .custom-cursor-active * {
     cursor: none !important;
@@ -81,14 +96,20 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 @keyframes border-flow-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-spin-slow {
@@ -96,8 +117,13 @@
 }
 
 @keyframes logo-marquee-side {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 .animate-logo-marquee {
@@ -105,4 +131,3 @@
   width: max-content;
   animation: logo-marquee-side 30s linear infinite;
 }
-

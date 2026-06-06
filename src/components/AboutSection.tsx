@@ -100,16 +100,16 @@ export default function AboutSection() {
 
       {/* Balanced 3-Column Creative Layout */}
       <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-14 relative z-10 pt-4">
-        
+
         {/* COLUMN 1: Visual Identity and Face Asset */}
         <div className="reveal-section-col lg:col-span-4 flex flex-col animate-fadeIn relative group">
           {/* Subtle responsive glowing aura behind the portrait matching the lighting in the photo */}
           <div className="absolute -inset-4 bg-gradient-to-tr from-red-500/10 to-transparent rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-1000 pointer-events-none z-0" />
-          
+
           <div className="relative w-full overflow-hidden aspect-[3/4] bg-black rounded-[2rem] border border-zinc-900/40 z-10">
             {/* Displaying original high-fidelity uploaded portrait with selective red-lighting */}
             <motion.img
-              src="/src/assets/images/sohaib_portrait_1780523641372.png"
+              src="../src/assets/images/me.png"
               alt="Sohaib Elahi Portrait"
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover rounded-[2rem] transition-transform duration-1000 ease-out group-hover:scale-105"
@@ -154,7 +154,7 @@ export default function AboutSection() {
 
         {/* COLUMN 3: Chronology Experience Log and Skills Matrix */}
         <div className="reveal-section-col lg:col-span-4 flex flex-col gap-10 pt-4 lg:pt-0">
-          
+
           {/* PROFESSIONAL TIMELINE */}
           <div>
             <div className="pb-2 border-b border-zinc-800 mb-4 flex items-center justify-between">
@@ -197,9 +197,9 @@ export default function AboutSection() {
               {skillsList.map((skill) => (
                 <motion.span
                   key={skill}
-                  whileHover={{ 
-                    borderColor: "rgba(239, 68, 68, 0.4)", 
-                    backgroundColor: "rgba(239, 68, 68, 0.04)" 
+                  whileHover={{
+                    borderColor: "rgba(239, 68, 68, 0.4)",
+                    backgroundColor: "rgba(239, 68, 68, 0.04)"
                   }}
                   transition={{ duration: 0.2 }}
                   className="px-3.5 py-1.5 text-[11px] text-zinc-300 bg-zinc-950 border border-zinc-800/80 rounded-full cursor-default select-none transition-colors duration-300"
