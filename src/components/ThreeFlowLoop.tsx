@@ -22,6 +22,7 @@ export default function ThreeFlowLoop() {
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
     camera.position.z = 11;
 
+    const isMobileScreen = window.innerWidth < 768;
     // 3. Renderer Setup
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -30,10 +31,10 @@ export default function ThreeFlowLoop() {
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobileScreen ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 1.8));
 
-    // 4. Geometry & Custom Attributes for 12,000 particles (denser, glowing flow)
-    const particleCount = 12000;
+    // 4. Geometry & Custom Attributes for particles (denser, glowing flow)
+    const particleCount = isMobileScreen ? 2500 : 6000;
     const geometry = new THREE.BufferGeometry();
 
     const positions = new Float32Array(particleCount * 3);
@@ -186,10 +187,17 @@ export default function ThreeFlowLoop() {
     });
 
     // 7. Core Render Loop
-    let animationFrameId: number;
+    let isVisible = false;
+    let animationFrameId: number | null = null;
     const clock = new THREE.Clock();
 
     const animate = () => {
+      if (!isVisible) {
+        animationFrameId = null;
+        return;
+      }
+      animationFrameId = requestAnimationFrame(animate);
+
       const elapsedTime = clock.getElapsedTime();
       uniforms.uTime.value = elapsedTime;
 
@@ -199,9 +207,22 @@ export default function ThreeFlowLoop() {
       points.rotation.z = 0.0;
 
       renderer.render(scene, camera);
-      animationFrameId = requestAnimationFrame(animate);
     };
-    animate();
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          if (animationFrameId === null) {
+            clock.getDelta(); // reset clock
+            animate();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(containerRef.current);
 
     // 8. Robust Resizing Setup
     const handleResize = () => {
@@ -213,7 +234,7 @@ export default function ThreeFlowLoop() {
       camera.updateProjectionMatrix();
 
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(isMobileScreen ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 1.8));
       updateScaleWithWindow(w);
     };
 
@@ -227,9 +248,10 @@ export default function ThreeFlowLoop() {
 
     // 9. Cleanup
     return () => {
+      observer.disconnect();
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
       resizeObserver.disconnect();
-      cancelAnimationFrame(animationFrameId);
       
       if (scrollAnimation.scrollTrigger) {
         scrollAnimation.scrollTrigger.kill();

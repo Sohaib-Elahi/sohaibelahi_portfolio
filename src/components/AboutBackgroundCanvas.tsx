@@ -16,40 +16,33 @@ export default function AboutBackgroundCanvas() {
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
     camera.position.set(0, 0, 10);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const isMobileScreen = window.innerWidth < 768;
+    const renderer = new THREE.WebGLRenderer({ antialias: !isMobileScreen, alpha: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobileScreen ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 1.8));
     container.appendChild(renderer.domElement);
 
     // Dynamic particles matching the red/black mesh theme
-    const particleCount = 200;
+    const particleCount = isMobileScreen ? 80 : 200;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
-    const originalPositions = new Float32Array(particleCount * 3);
     const speeds = new Float32Array(particleCount * 3);
     const scales = new Float32Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
-      const x = (Math.random() - 0.5) * 16;
-      const y = (Math.random() - 0.5) * 10;
-      const z = (Math.random() - 0.5) * 4 - 2;
+      positions[i * 3] = (Math.random() - 0.5) * 16;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 4 - 2;
 
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      originalPositions[i * 3] = x;
-      originalPositions[i * 3 + 1] = y;
-      originalPositions[i * 3 + 2] = z;
-
-      speeds[i * 3] = (Math.random() - 0.5) * 0.004;
-      speeds[i * 3 + 1] = (Math.random() - 0.5) * 0.004;
-      speeds[i * 3 + 2] = (Math.random() - 0.5) * 0.001;
+      speeds[i * 3] = (Math.random() - 0.5) * 1.5;
+      speeds[i * 3 + 1] = (Math.random() - 0.5) * 1.5;
+      speeds[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
 
       scales[i] = 0.5 + Math.random() * 2.5;
     }
 
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("aSpeed", new THREE.BufferAttribute(speeds, 3));
     geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
 
     const uniforms = {
@@ -62,11 +55,17 @@ export default function AboutBackgroundCanvas() {
       uniform float uTime;
       uniform vec2 uMouse;
       attribute float aScale;
+      attribute vec3 aSpeed;
       varying float vGlow;
       varying vec3 vWorldPosition;
 
       void main() {
         vec3 pos = position;
+
+        // Bounded, deterministic GPU-driven drift oscillation
+        pos.x += sin(uTime * 0.2 + aSpeed.x) * 1.2;
+        pos.y += cos(uTime * 0.15 + aSpeed.y) * 1.2;
+        pos.z += sin(uTime * 0.1 + aSpeed.z) * 0.6;
 
         pos.x += sin(uTime * 0.4 + pos.y) * 0.12;
         pos.y += cos(uTime * 0.3 + pos.x) * 0.12;
@@ -116,11 +115,12 @@ export default function AboutBackgroundCanvas() {
       depthWrite: false,
     });
 
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
 
     // Background Mesh
-    const meshGeom = new THREE.PlaneGeometry(100, 60, 16, 16);
+    const meshSegments = isMobileScreen ? 8 : 16;
+    const meshGeom = new THREE.PlaneGeometry(100, 60, meshSegments, meshSegments);
     const meshUniforms = {
       uTime: { value: 0 },
       uMouse: { value: new THREE.Vector2(0, 0) },
@@ -160,7 +160,6 @@ export default function AboutBackgroundCanvas() {
         float centerVignette = distance(uv, vec2(0.5));
         mixedLava = mix(mixedLava, vec3(0.0), centerVignette * 0.4);
 
-        // Flawless boundary vignette to smoothly fade and eliminate rectangular grid edges
         float borderVignette = smoothstep(0.0, 0.15, uv.x) * smoothstep(1.0, 0.85, uv.x) *
                                smoothstep(0.0, 0.15, uv.y) * smoothstep(1.0, 0.85, uv.y);
 
@@ -196,10 +195,17 @@ export default function AboutBackgroundCanvas() {
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
-    let animationFrameId: number;
+    let isVisible = false;
+    let animationFrameId: number | null = null;
     let clock = new THREE.Clock();
 
     const animate = () => {
+      if (!isVisible) {
+        animationFrameId = null;
+        return;
+      }
+      animationFrameId = requestAnimationFrame(animate);
+
       const elapsed = clock.getElapsedTime();
       uniforms.uTime.value = elapsed;
       meshUniforms.uTime.value = elapsed;
@@ -210,34 +216,27 @@ export default function AboutBackgroundCanvas() {
       uniforms.uMouse.value.set(mouseX, mouseY);
       meshUniforms.uMouse.value.set(mouseX, mouseY);
 
-      const posAttr = geometry.getAttribute("position") as THREE.BufferAttribute;
-      const posArray = posAttr.array as Float32Array;
-
-      for (let i = 0; i < particleCount; i++) {
-        posArray[i * 3] += speeds[i * 3] + Math.sin(elapsed + i) * 0.0001;
-        posArray[i * 3 + 1] += speeds[i * 3 + 1] + Math.cos(elapsed + i) * 0.0001;
-
-        const ox = originalPositions[i * 3];
-        const oy = originalPositions[i * 3 + 1];
-        const dx = posArray[i * 3] - ox;
-        const dy = posArray[i * 3 + 1] - oy;
-
-        if (dx * dx + dy * dy > 3.0) {
-          posArray[i * 3] = ox;
-          posArray[i * 3 + 1] = oy;
-        }
-      }
-      posAttr.needsUpdate = true;
-
       camera.position.x = mouseX * 0.8;
       camera.position.y = mouseY * 0.5;
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
-      animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          if (animationFrameId === null) {
+            clock.getDelta(); // reset clock
+            animate();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(container);
 
     const handleResize = () => {
       const w = container.clientWidth;
@@ -252,8 +251,9 @@ export default function AboutBackgroundCanvas() {
     resizeObserver.observe(container);
 
     return () => {
+      observer.disconnect();
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);

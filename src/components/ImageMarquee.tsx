@@ -1,22 +1,22 @@
 import React from "react";
 import { motion } from "motion/react";
 
-import m1 from "../assets/images/marquee1/1.png";
-import m2 from "../assets/images/marquee1/6.png";
-import m3 from "../assets/images/marquee1/10.png";
-import m4 from "../assets/images/marquee1/4.png";
-import m5 from "../assets/images/marquee1/5.png";
-import m6 from "../assets/images/marquee1/2.png";
-import m7 from "../assets/images/marquee1/7.png";
-import m8 from "../assets/images/marquee1/8.png";
-import m9 from "../assets/images/marquee1/9.png";
-import m10 from "../assets/images/marquee1/3.png";
-import m11 from "../assets/images/marquee1/11.png";
-import m12 from "../assets/images/marquee1/16.png";
-import m13 from "../assets/images/marquee1/13.png";
-import m14 from "../assets/images/marquee1/14.png";
-import m15 from "../assets/images/marquee1/15.png";
-import m16 from "../assets/images/marquee1/12.png";
+import m1 from "../assets/images/marquee1/1.webp";
+import m2 from "../assets/images/marquee1/6.webp";
+import m3 from "../assets/images/marquee1/10.webp";
+import m4 from "../assets/images/marquee1/4.webp";
+import m5 from "../assets/images/marquee1/5.webp";
+import m6 from "../assets/images/marquee1/2.webp";
+import m7 from "../assets/images/marquee1/7.webp";
+import m8 from "../assets/images/marquee1/8.webp";
+import m9 from "../assets/images/marquee1/9.webp";
+import m10 from "../assets/images/marquee1/3.webp";
+import m11 from "../assets/images/marquee1/11.webp";
+import m12 from "../assets/images/marquee1/16.webp";
+import m13 from "../assets/images/marquee1/13.webp";
+import m14 from "../assets/images/marquee1/14.webp";
+import m15 from "../assets/images/marquee1/15.webp";
+import m16 from "../assets/images/marquee1/12.webp";
 
 const IMAGES = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16];
 
@@ -53,7 +53,7 @@ export default function ImageMarquee() {
                   src={src}
                   alt={`Inspirational design ${index % IMAGES.length}`}
                   referrerPolicy="no-referrer"
-                  loading="eager"
+                  loading="lazy"
                   className="w-full h-full object-cover rounded-2xl select-none pointer-events-none"
                 />
               </div>

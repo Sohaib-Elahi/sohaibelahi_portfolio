@@ -105,8 +105,11 @@ export default function App() {
     };
   }, []);
 
-  // Initialize Lenis for buttery smooth scrolling
+  // Initialize Lenis for buttery smooth scrolling (desktop only — native scroll is faster on mobile)
   useEffect(() => {
+    // On mobile, native scroll is handled by the OS compositor and is always smoother
+    if (window.innerWidth < 768) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

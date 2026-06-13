@@ -28,7 +28,8 @@ export default function FooterCanvas() {
 
     let width = (canvas.width = container.clientWidth || window.innerWidth);
     let height = (canvas.height = container.clientHeight || 500);
-    const dpr = window.devicePixelRatio || 1;
+    const isMobileScreen = window.innerWidth < 768;
+    const dpr = isMobileScreen ? Math.min(window.devicePixelRatio || 1, 1.2) : Math.min(window.devicePixelRatio || 1, 2);
 
     const resize = () => {
       if (!container || !canvas) return;
@@ -47,7 +48,7 @@ export default function FooterCanvas() {
 
     // Build smooth vector streams
     let filaments: SeededParticle[] = [];
-    const filamentCount = Math.min(130, Math.floor((width * height) / 6000));
+    const filamentCount = isMobileScreen ? Math.min(40, Math.floor((width * height) / 12000)) : Math.min(100, Math.floor((width * height) / 6000));
 
     const createFilament = (randomStart = false): SeededParticle => {
       const rx = Math.random() * width;
@@ -89,7 +90,8 @@ export default function FooterCanvas() {
     }
 
     let time = 0;
-    let animId: number;
+    let animId: number | null = null;
+    let isVisible = false;
 
     // Fluid field mathematics function
     const getFieldAngle = (x: number, y: number, t: number) => {
@@ -225,10 +227,25 @@ export default function FooterCanvas() {
         }
       });
 
-      animId = requestAnimationFrame(draw);
+      if (isVisible) {
+        animId = requestAnimationFrame(draw);
+      } else {
+        animId = null;
+      }
     };
 
-    draw();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible && animId === null) {
+          time = 0;
+          draw();
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(container);
 
     // Event listeners
     const handleMouseMove = (e: MouseEvent) => {
@@ -258,11 +275,12 @@ export default function FooterCanvas() {
     container.addEventListener("touchend", handleMouseLeave, { passive: true });
 
     return () => {
+      observer.disconnect();
       container.removeEventListener("mousemove", handleMouseMove);
       container.removeEventListener("mouseleave", handleMouseLeave);
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleMouseLeave);
-      cancelAnimationFrame(animId);
+      if (animId !== null) cancelAnimationFrame(animId);
       resizeObserver.disconnect();
     };
   }, []);

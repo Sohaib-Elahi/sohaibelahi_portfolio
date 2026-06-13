@@ -40,9 +40,7 @@ export default function InteractiveTextCanvas() {
 
       draw() {
         ctx!.fillStyle = this.color;
-        ctx!.beginPath();
-        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx!.fill();
+        ctx!.fillRect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
       }
 
       update() {
@@ -103,7 +101,7 @@ export default function InteractiveTextCanvas() {
       ctx.clearRect(0, 0, width, height);
 
       // We extract pixel locations to create particles
-      const step = width < 768 ? 3 : 4; 
+      const step = width < 768 ? 6 : 4; 
       
       for (let y = 0; y < textCoordinates.height; y += step) {
         for (let x = 0; x < textCoordinates.width; x += step) {
@@ -125,8 +123,13 @@ export default function InteractiveTextCanvas() {
         init();
     });
 
-    let animationId: number;
+    let isVisible = false;
+    let animationId: number | null = null;
     function animate() {
+      if (!isVisible) {
+        animationId = null;
+        return;
+      }
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
       
@@ -136,7 +139,6 @@ export default function InteractiveTextCanvas() {
       }
       animationId = requestAnimationFrame(animate);
     }
-    animate();
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -160,14 +162,29 @@ export default function InteractiveTextCanvas() {
     canvas.addEventListener('pointerleave', handleMouseLeave);
     
     // Add resize observer for robust resize handling
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(canvas);
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(canvas);
+
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          if (animationId === null) {
+            animate();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+    intersectionObserver.observe(canvas);
 
     return () => {
+      intersectionObserver.disconnect();
+      if (animationId !== null) cancelAnimationFrame(animationId);
       window.removeEventListener('pointermove', handleMouseMove);
       canvas.removeEventListener('pointerleave', handleMouseLeave);
-      observer.disconnect();
-      cancelAnimationFrame(animationId);
+      resizeObserver.disconnect();
     };
 
   }, []);

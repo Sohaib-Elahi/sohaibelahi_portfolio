@@ -20,6 +20,7 @@ export default function FooterSineWave() {
     // Position camera far enough to see the horizontal wave span
     camera.position.z = 10;
 
+    const isMobileScreen = window.innerWidth < 768;
     // 3. WebGL Renderer
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -28,10 +29,10 @@ export default function FooterSineWave() {
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobileScreen ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 1.8));
 
     // 4. Geometry & Particles Setup
-    const particleCount = 8000;
+    const particleCount = isMobileScreen ? 1500 : 4000;
     const geometry = new THREE.BufferGeometry();
 
     const positions = new Float32Array(particleCount * 3);
@@ -183,17 +184,37 @@ export default function FooterSineWave() {
     updateScaleWithWindow(width);
 
     // 7. Render Loop
+    let isVisible = false;
+    let animationFrameId: number | null = null;
     const clock = new THREE.Clock();
-    let animationFrameId: number;
 
     const animate = () => {
+      if (!isVisible) {
+        animationFrameId = null;
+        return;
+      }
+      animationFrameId = requestAnimationFrame(animate);
+
       const elapsed = clock.getElapsedTime();
       uniforms.uTime.value = elapsed;
 
       renderer.render(scene, camera);
-      animationFrameId = requestAnimationFrame(animate);
     };
-    animate();
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          if (animationFrameId === null) {
+            clock.getDelta(); // reset clock
+            animate();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(containerRef.current);
 
     // 8. Resizing handler
     const handleResize = () => {
@@ -205,7 +226,7 @@ export default function FooterSineWave() {
       camera.updateProjectionMatrix();
 
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(isMobileScreen ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 1.8));
       updateScaleWithWindow(w);
     };
 
@@ -218,9 +239,10 @@ export default function FooterSineWave() {
 
     // 9. Cleanup
     return () => {
+      observer.disconnect();
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
       resizeObserver.disconnect();
-      cancelAnimationFrame(animationFrameId);
 
       geometry.dispose();
       material.dispose();

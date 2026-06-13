@@ -17,42 +17,33 @@ export default function ServicesBackgroundCanvas() {
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
     camera.position.set(0, 0, 10);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const isMobileScreen = window.innerWidth < 768;
+    const renderer = new THREE.WebGLRenderer({ antialias: !isMobileScreen, alpha: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobileScreen ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 1.8));
     container.appendChild(renderer.domElement);
 
     // Dynamic particles matching the red/black mesh theme
-    const particleCount = 280;
+    const particleCount = isMobileScreen ? 100 : 280;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
-    const originalPositions = new Float32Array(particleCount * 3);
     const speeds = new Float32Array(particleCount * 3);
     const scales = new Float32Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
-      // Span particles randomly in a 3D box region
-      const x = (Math.random() - 0.5) * 16;
-      const y = (Math.random() - 0.5) * 10;
-      const z = (Math.random() - 0.5) * 4 - 2;
+      positions[i * 3] = (Math.random() - 0.5) * 16;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 4 - 2;
 
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      originalPositions[i * 3] = x;
-      originalPositions[i * 3 + 1] = y;
-      originalPositions[i * 3 + 2] = z;
-
-      // Small jitter speed vectors
-      speeds[i * 3] = (Math.random() - 0.5) * 0.005;
-      speeds[i * 3 + 1] = (Math.random() - 0.5) * 0.005;
-      speeds[i * 3 + 2] = (Math.random() - 0.5) * 0.001;
+      speeds[i * 3] = (Math.random() - 0.5) * 1.5;
+      speeds[i * 3 + 1] = (Math.random() - 0.5) * 1.5;
+      speeds[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
 
       scales[i] = 0.5 + Math.random() * 2.5;
     }
 
     geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("aSpeed", new THREE.BufferAttribute(speeds, 3));
     geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
 
     // Custom shaders to create a gorgeous crimson glowing nebula & micro-particles
@@ -66,11 +57,17 @@ export default function ServicesBackgroundCanvas() {
       uniform float uTime;
       uniform vec2 uMouse;
       attribute float aScale;
+      attribute vec3 aSpeed;
       varying float vGlow;
       varying vec3 vWorldPosition;
 
       void main() {
         vec3 pos = position;
+
+        // Bounded, deterministic GPU-driven drift oscillation
+        pos.x += sin(uTime * 0.2 + aSpeed.x) * 1.2;
+        pos.y += cos(uTime * 0.15 + aSpeed.y) * 1.2;
+        pos.z += sin(uTime * 0.1 + aSpeed.z) * 0.6;
 
         // Subtle sinus movement over time
         pos.x += sin(uTime * 0.5 + pos.y) * 0.15;
@@ -127,12 +124,13 @@ export default function ServicesBackgroundCanvas() {
       depthWrite: false,
     });
 
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
 
     // Mesh Gradient Background inside Three.js
     // Create plane behind everything to act as a reactive nebula mesh
-    const meshGeom = new THREE.PlaneGeometry(100, 60, 32, 32);
+    const meshSegments = isMobileScreen ? 8 : 32;
+    const meshGeom = new THREE.PlaneGeometry(100, 60, meshSegments, meshSegments);
     
     const meshUniforms = {
       uTime: { value: 0 },
@@ -218,10 +216,17 @@ export default function ServicesBackgroundCanvas() {
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
-    let animationFrameId: number;
+    let isVisible = false;
+    let animationFrameId: number | null = null;
     let clock = new THREE.Clock();
 
     const animate = () => {
+      if (!isVisible) {
+        animationFrameId = null;
+        return;
+      }
+      animationFrameId = requestAnimationFrame(animate);
+
       const elapsed = clock.getElapsedTime();
       uniforms.uTime.value = elapsed;
       meshUniforms.uTime.value = elapsed;
@@ -233,36 +238,27 @@ export default function ServicesBackgroundCanvas() {
       uniforms.uMouse.value.set(mouseX, mouseY);
       meshUniforms.uMouse.value.set(mouseX, mouseY);
 
-      // Mutate positions slightly for float effect
-      const posAttr = geometry.getAttribute("position") as THREE.BufferAttribute;
-      const posArray = posAttr.array as Float32Array;
-
-      for (let i = 0; i < particleCount; i++) {
-        posArray[i * 3] += speeds[i * 3] + Math.sin(elapsed + i) * 0.0002;
-        posArray[i * 3 + 1] += speeds[i * 3 + 1] + Math.cos(elapsed + i) * 0.0002;
-
-        // Reset if drifted too far
-        const ox = originalPositions[i * 3];
-        const oy = originalPositions[i * 3 + 1];
-        const dx = posArray[i * 3] - ox;
-        const dy = posArray[i * 3 + 1] - oy;
-
-        if (dx * dx + dy * dy > 3.0) {
-          posArray[i * 3] = ox;
-          posArray[i * 3 + 1] = oy;
-        }
-      }
-      posAttr.needsUpdate = true;
-
       camera.position.x = mouseX * 0.8;
       camera.position.y = mouseY * 0.5;
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
-      animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          if (animationFrameId === null) {
+            clock.getDelta(); // reset clock
+            animate();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(container);
 
     const handleResize = () => {
       const w = container.clientWidth;
@@ -277,8 +273,9 @@ export default function ServicesBackgroundCanvas() {
     resizeObserver.observe(container);
 
     return () => {
+      observer.disconnect();
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);

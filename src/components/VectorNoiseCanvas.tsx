@@ -17,7 +17,7 @@ export default function VectorNoiseCanvas() {
   const glCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const strokeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  
+
   const mouseRef = useRef<{ x: number; y: number; active: boolean; prevX: number; prevY: number; velocity: number }>({
     x: 0,
     y: 0,
@@ -29,9 +29,21 @@ export default function VectorNoiseCanvas() {
 
   const scrollRef = useRef<number>(0);
 
-  const [particleCount] = useState<number>(500);
+  const [particleCount] = useState<number>(() =>
+    typeof window !== "undefined" && window.innerWidth < 768 ? 90 : 220
+  );
   const [noiseScale] = useState<number>(0.0032);
   const [flowSpeed] = useState<number>(1.4);
+  const [historyLength] = useState<number>(() =>
+    typeof window !== "undefined" && window.innerWidth < 768 ? 8 : 16
+  );
+
+  const dpr = Math.min(
+    window.devicePixelRatio || 1,
+    typeof window !== "undefined" && window.innerWidth < 768 ? 1.2 : 1.6
+  );
+
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,19 +73,18 @@ export default function VectorNoiseCanvas() {
       width = rect.width;
       height = rect.height;
 
-      // GL screen Setup
       glCanvas.width = width * dpr;
       glCanvas.height = height * dpr;
       glCanvas.style.width = `${width}px`;
       glCanvas.style.height = `${height}px`;
       gl.viewport(0, 0, glCanvas.width, glCanvas.height);
 
-      // Stroke Canvas high-density Setup
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       strokeCanvas.width = width * dpr;
       strokeCanvas.height = height * dpr;
       strokeCanvas.style.width = `${width}px`;
       strokeCanvas.style.height = `${height}px`;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     resizeCanvases();
@@ -244,11 +255,11 @@ export default function VectorNoiseCanvas() {
       gl.ARRAY_BUFFER,
       new Float32Array([
         -1.0, -1.0,
-         1.0, -1.0,
-        -1.0,  1.0,
-        -1.0,  1.0,
-         1.0, -1.0,
-         1.0,  1.0,
+        1.0, -1.0,
+        -1.0, 1.0,
+        -1.0, 1.0,
+        1.0, -1.0,
+        1.0, 1.0,
       ]),
       gl.STATIC_DRAW
     );
@@ -261,7 +272,7 @@ export default function VectorNoiseCanvas() {
       const rx = Math.random() * width;
       const ry = Math.random() * height;
       const maxAge = 140 + Math.random() * 200;
-      
+
       const rChance = Math.random();
       let redVal = 255;
       let greenVal = 20;
@@ -301,7 +312,7 @@ export default function VectorNoiseCanvas() {
         maxAge: maxAge,
         color: { r: redVal, g: greenVal, b: blueVal, a: alpha },
         angleOffset: (Math.random() - 0.5) * 0.25,
-        thickness: 1.2 + Math.random() * 1.6, 
+        thickness: 1.2 + Math.random() * 1.6,
       };
     };
 
@@ -358,25 +369,25 @@ export default function VectorNoiseCanvas() {
           const dx = mouse.x - p.x;
           const dy = mouse.y - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          
+
           if (dist < 20) {
             // Sucked into cursor gravity sink. Expire immediately and regenerate to loop the flow gracefully
             p.age = p.maxAge;
           } else if (dist < 450) {
             // Far-reaching creative Perlin attraction field (450px) with smooth force decay
             const force = Math.pow((450 - dist) / 450, 1.4);
-            
+
             // Tangent circular swirl vectors mapping to physical vortex spirals
             const tx = -dy / dist;
             const ty = dx / dist;
-            
+
             // Mix direct attraction towards mouse and orbiting swirl tangent vectors
             const attractionX = (dx / dist) * p.speed * 2.6 + tx * p.speed * 1.5;
             const attractionY = (dy / dist) * p.speed * 2.6 + ty * p.speed * 1.5;
-            
+
             // Realtime responsive kinetic feedback: smooth, gentle cursor velocity reaction
             const speedBoost = 1.0 + Math.min(mouse.velocity * 0.05, 0.7);
-            
+
             // Seamlessly override classical Perlin flow with the enhanced attractor vortex
             vx = (vx * (1 - force) + attractionX * force) * speedBoost;
             vy = (vy * (1 - force) + attractionY * force) * speedBoost;
@@ -385,7 +396,7 @@ export default function VectorNoiseCanvas() {
 
         // Push current point to history, then slide
         p.history.push({ x: p.x, y: p.y });
-        if (p.history.length > 24) {
+        if (p.history.length > historyLength) {
           p.history.shift();
         }
 
@@ -440,7 +451,7 @@ export default function VectorNoiseCanvas() {
       const rect = containerRef.current.getBoundingClientRect();
       const curX = e.clientX - rect.left;
       const curY = e.clientY - rect.top;
-      
+
       const mouse = mouseRef.current;
       const dx = curX - mouse.prevX;
       const dy = curY - mouse.prevY;
@@ -493,4 +504,3 @@ export default function VectorNoiseCanvas() {
     </div>
   );
 }
-

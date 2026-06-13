@@ -4,18 +4,18 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-import m1 from "../assets/images/Marquee2/1.png";
-import m2 from "../assets/images/Marquee2/2.png";
-import m3 from "../assets/images/Marquee2/3.png";
-import m4 from "../assets/images/Marquee2/8.png";
-import m5 from "../assets/images/Marquee2/5.png";
-import m6 from "../assets/images/Marquee2/6.png";
-import m11 from "../assets/images/Marquee2/5.png";
-import m12 from "../assets/images/Marquee2/4.png";
-import m13 from "../assets/images/Marquee2/6.png";
-import m14 from "../assets/images/Marquee2/7.png";
-import m15 from "../assets/images/Marquee2/8.png";
-import m16 from "../assets/images/Marquee2/5.png";
+import m1 from "../assets/images/Marquee2/1.webp";
+import m2 from "../assets/images/Marquee2/2.webp";
+import m3 from "../assets/images/Marquee2/3.webp";
+import m4 from "../assets/images/Marquee2/8.webp";
+import m5 from "../assets/images/Marquee2/5.webp";
+import m6 from "../assets/images/Marquee2/6.webp";
+import m11 from "../assets/images/Marquee2/5.webp";
+import m12 from "../assets/images/Marquee2/4.webp";
+import m13 from "../assets/images/Marquee2/6.webp";
+import m14 from "../assets/images/Marquee2/7.webp";
+import m15 from "../assets/images/Marquee2/8.webp";
+import m16 from "../assets/images/Marquee2/5.webp";
 
 const ROW_1_IMAGES = [m11, m12, m13, m14, m15, m16];
 const ROW_2_IMAGES = [m1, m2, m3, m4, m5, m6];
@@ -92,6 +92,7 @@ export default function PortfolioScrollSection() {
                 src={src}
                 alt={`Portfolio mock 1-${index}`}
                 referrerPolicy="no-referrer"
+                loading="lazy"
                 className="w-full h-full object-cover pointer-events-none select-none grayscale-[15%] hover:grayscale-0 transition-all duration-700"
               />
             </div>
@@ -114,6 +115,7 @@ export default function PortfolioScrollSection() {
                 src={src}
                 alt={`Portfolio mock 2-${index}`}
                 referrerPolicy="no-referrer"
+                loading="lazy"
                 className="w-full h-full object-cover pointer-events-none select-none grayscale-[15%] hover:grayscale-0 transition-all duration-700"
               />
             </div>

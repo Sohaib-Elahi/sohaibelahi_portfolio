@@ -11,6 +11,7 @@ export default function PhoenixParticles() {
     // Standard high performance 3D scene setup
     const scene = new THREE.Scene();
     
+    const isMobileScreen = window.innerWidth < 768;
     const width = container.clientWidth;
     const height = container.clientHeight;
     
@@ -18,13 +19,13 @@ export default function PhoenixParticles() {
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.set(0, 0, 4.2);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isMobileScreen });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobileScreen ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 1.8));
     container.appendChild(renderer.domElement);
 
     // High fidelity pristine structural particle bird
-    const particleCount = 28000;
+    const particleCount = isMobileScreen ? 3500 : 10000;
     const geometry = new THREE.BufferGeometry();
     
     const positions = new Float32Array(particleCount * 3);
@@ -274,7 +275,9 @@ export default function PhoenixParticles() {
 
     // Dynamic rendering loop
     const clock = new THREE.Clock();
-    let reqId: number;
+    let isVisible = false;
+    let reqId: number | null = null;
+    let frameCount = 0; // for mobile frame-skipping
 
     // Premium active glows (intense cosmic laser field) when interacted with
     const cActiveBrightOrange = new THREE.Color("#f24e13");
@@ -282,9 +285,14 @@ export default function PhoenixParticles() {
     const cActiveCrimsonLaser = new THREE.Color("#cc0004");
 
     const animate = () => {
+      if (!isVisible) {
+        reqId = null;
+        return;
+      }
       reqId = requestAnimationFrame(animate);
 
       const elapsedTime = clock.getElapsedTime();
+      frameCount++;
       
       // Interpolate mouse smoothly (Euler decay)
       mouse.x += (mouse.targetX - mouse.x) * 0.08;
@@ -298,6 +306,10 @@ export default function PhoenixParticles() {
         points.position.y = Math.sin(elapsedTime * 0.75) * 0.035;
       }
 
+      // On mobile, skip the CPU particle loop every other frame to halve JS cost
+      const shouldUpdateParticles = !isMobileScreen || (frameCount % 2 === 0);
+      
+      if (shouldUpdateParticles) {
       const posArray = geometry.attributes.position.array as Float32Array;
       const colorArray = geometry.attributes.color.array as Float32Array;
       const count = posArray.length / 3;
@@ -389,13 +401,29 @@ export default function PhoenixParticles() {
 
       geometry.attributes.position.needsUpdate = true;
       geometry.attributes.color.needsUpdate = true;
+      } // end shouldUpdateParticles
+
       renderer.render(scene, camera);
     };
 
-    animate();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          if (reqId === null) {
+            clock.getDelta(); // reset clock to avoid sudden jumps
+            animate();
+          }
+        }
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(container);
 
     return () => {
-      cancelAnimationFrame(reqId);
+      observer.disconnect();
+      if (reqId !== null) cancelAnimationFrame(reqId);
       window.removeEventListener("mousemove", handleMouseMove);
       resizeObserver.disconnect();
       if (renderer && renderer.domElement && container.contains(renderer.domElement)) {
@@ -403,6 +431,7 @@ export default function PhoenixParticles() {
       }
       geometry.dispose();
       material.dispose();
+      renderer.dispose();
     };
   }, []);
 

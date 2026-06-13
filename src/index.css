@@ -131,3 +131,20 @@
   width: max-content;
   animation: logo-marquee-side 30s linear infinite;
 }
+
+/* ===== MOBILE SCROLL PERFORMANCE ===== */
+/* Touch action optimization — prevents 300ms tap delay 
+   and enables fast native momentum scrolling */
+html {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Reduce motion for accessibility and battery savings */
+@media (prefers-reduced-motion: reduce) {
+  .animate-logo-marquee,
+  .animate-spin-slow {
+    animation: none !important;
+    transition: none !important;
+  }
+}
