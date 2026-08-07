@@ -17,17 +17,18 @@ export default function ThreeFlowLoop() {
     const scene = new THREE.Scene();
 
     // 2. Camera Setup
+    const isMobileScreen = window.innerWidth < 768;
     let width = containerRef.current.clientWidth || window.innerWidth;
     let height = containerRef.current.clientHeight || 1000;
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.z = 11;
+    // Zoom out more on mobile so the full loop fits within the viewport
+    camera.position.z = isMobileScreen ? 16 : 11;
 
-    const isMobileScreen = window.innerWidth < 768;
     // 3. Renderer Setup
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       alpha: true,
-      antialias: true,
+      antialias: !isMobileScreen,
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
@@ -75,13 +76,15 @@ export default function ThreeFlowLoop() {
     const uniforms = {
       uTime: { value: 0.0 },
       uScroll: { value: 0.0 },
-      uSize: { value: 36.0 },
+      uSize: { value: isMobileScreen ? 28.0 : 36.0 },
+      uXScale: { value: isMobileScreen ? 0.0 : 1.0 }, // 0 = narrow, 1 = full desktop width
     };
 
     const vertexShader = `
       uniform float uTime;
       uniform float uScroll;
       uniform float uSize;
+      uniform float uXScale;
 
       attribute float aProgress;
       attribute float aRandomSpeed;
@@ -95,8 +98,10 @@ export default function ThreeFlowLoop() {
         float flowTime = uTime * 0.22 * aRandomSpeed;
         float phase = aProgress * 6.28318 + flowTime;
 
-        // Custom parametric Lemniscate Loop coordinates proportioned beautifully for front view visibility
-        float x = 8.5 * sin(phase);
+        // Custom parametric Lemniscate Loop coordinates
+        // uXScale uniform narrows x-range on mobile to stay in viewport
+        float xAmp = mix(6.2, 8.5, uXScale);
+        float x = xAmp * sin(phase);
         float y = 2.8 * sin(2.0 * phase) * 0.77;
         float z = 1.0 * cos(phase);
 
@@ -164,12 +169,16 @@ export default function ThreeFlowLoop() {
 
     // Dynamic scale to adjust size of the loop itself relative to monitor/container width
     const updateScaleWithWindow = (w: number) => {
-      if (w < 640) {
+      if (w < 380) {
+        points.scale.set(0.38, 0.38, 0.38);
+      } else if (w < 480) {
+        points.scale.set(0.45, 0.45, 0.45);
+      } else if (w < 640) {
         points.scale.set(0.55, 0.55, 0.55);
       } else if (w < 1024) {
-        points.scale.set(0.75, 0.75, 0.75);
+        points.scale.set(0.72, 0.72, 0.72);
       } else {
-        points.scale.set(0.9, 0.9, 0.9);
+        points.scale.set(0.88, 0.88, 0.88);
       }
     };
     updateScaleWithWindow(width);

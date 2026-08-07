@@ -47,13 +47,13 @@ function ServiceCardItem({ srv, idx, isDesktop }: { srv: ServiceCard; idx: numbe
     >
       {/* Internal subtle custom glow behind content */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(239,68,68,0.035)_0%,_rgba(0,0,0,0)_65%)] opacity-80 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      
+
       {/* Glow border ring on hover */}
       <div className="absolute inset-[1px] rounded-[23px] bg-gradient-to-b from-white/[0.015] to-transparent pointer-events-none group-hover:from-[#ef4444]/10 transition-colors duration-500" />
 
       {/* TOP ROW: Title and number */}
       <div className="w-full relative z-10">
-        
+
         {/* Number */}
         <div className="font-sans font-normal text-white text-2xl tracking-tight mb-7 group-hover:text-white transition-colors duration-500">
           {srv.number}
@@ -70,8 +70,8 @@ function ServiceCardItem({ srv, idx, isDesktop }: { srv: ServiceCard; idx: numbe
       <div className="w-full flex flex-col gap-6 mt-6 relative z-10">
         <div className="flex flex-wrap gap-2">
           {srv.pills.slice(0, 3).map((pill) => (
-            <span 
-              key={pill} 
+            <span
+              key={pill}
               className="px-2.5 py-1 text-[10px] font-sans font-normal tracking-[0.05em] text-white bg-[#070708] border border-zinc-900/90 rounded-full transition-all duration-300 hover:border-white/40 hover:text-white group-hover:bg-zinc-950 capitalize bg-white/5"
             >
               {pill}
@@ -90,18 +90,18 @@ export default function InteractiveServicesGrid() {
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
     const scrollLeft = container.scrollLeft;
-    
+
     let minDiff = Infinity;
     let closestIndex = 0;
-    
+
     const containerCenter = scrollLeft + container.clientWidth / 2;
-    
+
     Array.from(container.children).forEach((child, index) => {
       const childElement = child as HTMLElement;
       // Since container is relative or similar, we calculate its center
       const childCenter = childElement.offsetLeft + childElement.clientWidth / 2;
       const diff = Math.abs(containerCenter - childCenter);
-      
+
       if (diff < minDiff) {
         minDiff = diff;
         closestIndex = index;
@@ -137,7 +137,7 @@ export default function InteractiveServicesGrid() {
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none z-0" />
 
       <div className="w-full max-w-7xl mx-auto flex flex-col gap-16 relative z-10">
-        
+
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-6 border-b border-zinc-900">
           <div>
@@ -149,7 +149,7 @@ export default function InteractiveServicesGrid() {
               <span className="italic text-white font-serif">are tailored</span>
             </h2>
           </div>
-          
+
           <div className="max-w-xs md:max-w-md">
             <p className="text-xs sm:text-sm text-white font-sans font-normal leading-relaxed transition-colors duration-300 lowercase">
               delivering hyper-customized high fidelity digital representations and marketing materials to grow online platforms. everything you need, engineered with precision.
@@ -160,13 +160,13 @@ export default function InteractiveServicesGrid() {
         {/* DESKTOP: 2 ROWS of 4 CARDS EACH - 8 total grid structure */}
         <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
           {servicesList.map((srv, idx) => (
-             <ServiceCardItem key={srv.number} srv={srv} idx={idx} isDesktop={true} />
+            <ServiceCardItem key={srv.number} srv={srv} idx={idx} isDesktop={true} />
           ))}
         </div>
 
         {/* MOBILE: Scroll Snap Carousel */}
         <div className="flex flex-col w-full items-center relative md:hidden">
-          <div 
+          <div
             ref={carouselRef}
             onScroll={handleScroll}
             className="w-full flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 [&::-webkit-scrollbar]:hidden relative"

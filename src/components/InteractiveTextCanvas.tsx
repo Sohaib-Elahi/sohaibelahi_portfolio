@@ -1,5 +1,13 @@
 import React, { useRef, useEffect } from 'react';
 
+/**
+ * InteractiveTextCanvas
+ * -------------------------------------------------------------------
+ * Particles flow in from random scatter positions and crystallise into
+ * fully-solid white text "I Design / I Build / I Scale".
+ * Mouse/touch repels them; they spring back to their home positions.
+ * On mobile: heavier step → fewer particles → fast & readable.
+ */
 export default function InteractiveTextCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -9,12 +17,14 @@ export default function InteractiveTextCanvas() {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    let width = canvas.width = canvas.clientWidth;
-    let height = canvas.height = canvas.clientHeight;
+    const isMobile = window.innerWidth < 768;
 
+    let width = 0;
+    let height = 0;
     let particles: Particle[] = [];
-    const mouse = { x: -1000, y: -1000, radius: 100 };
+    const mouse = { x: -9999, y: -9999, radius: isMobile ? 60 : 110 };
 
+    // ── Particle ────────────────────────────────────────────────────
     class Particle {
       x: number;
       y: number;
@@ -22,172 +32,175 @@ export default function InteractiveTextCanvas() {
       baseY: number;
       size: number;
       density: number;
-      color: string;
-      vx: number;
-      vy: number;
+      vx: number = 0;
+      vy: number = 0;
+      // Particles start far from home for the "flow-in" intro effect
+      settled: boolean = false;
 
-      constructor(x: number, y: number, color: string) {
-        this.x = x;
-        this.y = y;
-        this.baseX = x;
-        this.baseY = y;
-        this.size = Math.random() * 1.2 + 0.6; // Small, elegant particle size
-        this.density = (Math.random() * 25) + 5;
-        this.color = color;
-        this.vx = 0;
-        this.vy = 0;
+      constructor(bx: number, by: number) {
+        this.baseX = bx;
+        this.baseY = by;
+        // Scatter position: random on canvas
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = isMobile ? (Math.random() * 1.0 + 0.5) : (Math.random() * 1.3 + 0.6);
+        this.density = (Math.random() * 20) + 5;
       }
 
       draw() {
-        ctx!.fillStyle = this.color;
-        ctx!.fillRect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
+        ctx!.fillStyle = 'rgba(255,255,255,0.92)';
+        const s = this.size;
+        ctx!.fillRect(this.x - s, this.y - s, s * 2, s * 2);
       }
 
       update() {
-        let dx = mouse.x - this.x;
-        let dy = mouse.y - this.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < mouse.radius) {
-          let forceDirectionX = dx / distance;
-          let forceDirectionY = dy / distance;
-          // Apply a force inversely proportional to distance
-          let force = (mouse.radius - distance) / mouse.radius;
-          let directionX = forceDirectionX * force * this.density;
-          let directionY = forceDirectionY * force * this.density;
-          
-          this.vx -= directionX;
-          this.vy -= directionY;
-        } else {
-          // Spring back to home position
-          let springX = (this.baseX - this.x) * 0.05;
-          let springY = (this.baseY - this.y) * 0.05;
-          this.vx += springX;
-          this.vy += springY;
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < mouse.radius) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          this.vx -= (dx / dist) * force * this.density;
+          this.vy -= (dy / dist) * force * this.density;
         }
 
-        // Apply friction
-        this.vx *= 0.88;
-        this.vy *= 0.88;
+        // Spring toward home — stronger spring = faster convergence
+        const springStrength = this.settled ? 0.06 : 0.04;
+        this.vx += (this.baseX - this.x) * springStrength;
+        this.vy += (this.baseY - this.y) * springStrength;
+
+        // Friction
+        this.vx *= 0.86;
+        this.vy *= 0.86;
 
         this.x += this.vx;
         this.y += this.vy;
+
+        // Mark settled once close enough
+        if (!this.settled) {
+          const d2 = (this.x - this.baseX) ** 2 + (this.y - this.baseY) ** 2;
+          if (d2 < 4) this.settled = true;
+        }
       }
     }
 
-    function init() {
-      particles = [];
+    // ── Build particles from text pixels ────────────────────────────
+    function buildParticles() {
       if (!ctx || !canvas) return;
-      
+      particles = [];
+
       ctx.clearRect(0, 0, width, height);
-      
-      const fontSize = Math.max(Math.min(width * 0.14, 150), 60);
-      ctx.font = `italic 300 ${fontSize}px "Apple Garamond", Garamond, "Baskerville", serif`;
+
+      // ── Font sizing: 3 stacked lines ────────────────────────────
+      const fontSize = isMobile
+        ? Math.max(Math.min(width * 0.17, 110), 48)
+        : Math.max(Math.min(width * 0.12, 140), 72);
+
+      ctx.font = `italic 300 ${fontSize}px "Apple Garamond", Garamond, "Baskerville", "Times New Roman", serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      
-      const lineGap = fontSize * 0.9;
-      const centerY = height / 2;
 
-      ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-      ctx.fillText('I Design', width / 2 - fontSize * 0.7, centerY - lineGap);
-      ctx.fillText('I Build', width / 2, centerY);
-      
-      // Make the last word slightly faded native text styling
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText('I Scale', width / 2 + fontSize * 0.7, centerY + lineGap);
+      const lineGap = fontSize * 0.95;
+      const cy = height / 2;
 
-      const textCoordinates = ctx.getImageData(0, 0, width, height);
+      ctx.fillStyle = 'rgba(255,255,255,1)';
+      ctx.fillText('I Design', width / 2, cy - lineGap);
+      ctx.fillText('I Build', width / 2, cy);
+      ctx.fillText('I Scale', width / 2, cy + lineGap);
+
+      const imageData = ctx.getImageData(0, 0, width, height);
       ctx.clearRect(0, 0, width, height);
 
-      // We extract pixel locations to create particles
-      const step = width < 768 ? 6 : 4; 
-      
-      for (let y = 0; y < textCoordinates.height; y += step) {
-        for (let x = 0; x < textCoordinates.width; x += step) {
-          const alpha = textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3];
+      const step = isMobile ? 7 : 4;
+
+      for (let y = 0; y < imageData.height; y += step) {
+        for (let x = 0; x < imageData.width; x += step) {
+          const alpha = imageData.data[(y * 4 * imageData.width) + (x * 4) + 3];
           if (alpha > 128) {
-            let a = alpha / 255;
-            let r = textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4)];
-            let g = textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 1];
-            let b = textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 2];
-            let color = `rgba(${r}, ${g}, ${b}, ${a})`;
-            particles.push(new Particle(x, y, color));
+            particles.push(new Particle(x, y));
           }
         }
       }
     }
 
-    // Delay init slightly to ensure font is loaded
-    document.fonts.ready.then(() => {
-        init();
-    });
+    // ── Resize ───────────────────────────────────────────────────────
+    function resize() {
+      if (!canvas) return;
+      width = canvas.width = canvas.clientWidth;
+      height = canvas.height = canvas.clientHeight;
+      buildParticles();
+    }
 
+    // ── Animation loop ───────────────────────────────────────────────
     let isVisible = false;
-    let animationId: number | null = null;
+    let rafId: number | null = null;
+
     function animate() {
-      if (!isVisible) {
-        animationId = null;
-        return;
-      }
+      if (!isVisible) { rafId = null; return; }
       if (!ctx) return;
+
       ctx.clearRect(0, 0, width, height);
-      
       for (let i = 0; i < particles.length; i++) {
         particles[i].draw();
         particles[i].update();
       }
-      animationId = requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(animate);
     }
 
-    const handleMouseMove = (e: MouseEvent) => {
+    // ── Event handlers ───────────────────────────────────────────────
+    const onPointerMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
     };
+    const onPointerLeave = () => { mouse.x = -9999; mouse.y = -9999; };
 
-    const handleMouseLeave = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
+    // Touch support
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length < 1) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.touches[0].clientX - rect.left;
+      mouse.y = e.touches[0].clientY - rect.top;
     };
+    const onTouchEnd = () => { mouse.x = -9999; mouse.y = -9999; };
 
-    const handleResize = () => {
-      width = canvas.width = canvas.clientWidth;
-      height = canvas.height = canvas.clientHeight;
-      init();
-    };
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    canvas.addEventListener('pointerleave', onPointerLeave);
+    canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    canvas.addEventListener('touchend', onTouchEnd);
 
-    // Use pointer events for better mobile/touch support
-    window.addEventListener('pointermove', handleMouseMove);
-    canvas.addEventListener('pointerleave', handleMouseLeave);
-    
-    // Add resize observer for robust resize handling
-    const resizeObserver = new ResizeObserver(handleResize);
-    resizeObserver.observe(canvas);
+    // ── ResizeObserver ───────────────────────────────────────────────
+    const resizeObs = new ResizeObserver(() => resize());
+    resizeObs.observe(canvas);
 
-    const intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        const wasVisible = isVisible;
-        isVisible = entry.isIntersecting;
-        if (isVisible && !wasVisible) {
-          if (animationId === null) {
-            animate();
-          }
-        }
-      },
-      { threshold: 0.01 }
-    );
-    intersectionObserver.observe(canvas);
+    // ── IntersectionObserver ─────────────────────────────────────────
+    const intersectionObs = new IntersectionObserver(([entry]) => {
+      const was = isVisible;
+      isVisible = entry.isIntersecting;
+      if (isVisible && !was && rafId === null) animate();
+    }, { threshold: 0.01 });
+    intersectionObs.observe(canvas);
+
+    // ── Init after fonts load ────────────────────────────────────────
+    document.fonts.ready.then(() => resize());
 
     return () => {
-      intersectionObserver.disconnect();
-      if (animationId !== null) cancelAnimationFrame(animationId);
-      window.removeEventListener('pointermove', handleMouseMove);
-      canvas.removeEventListener('pointerleave', handleMouseLeave);
-      resizeObserver.disconnect();
+      intersectionObs.disconnect();
+      resizeObs.disconnect();
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener('pointermove', onPointerMove);
+      canvas.removeEventListener('pointerleave', onPointerLeave);
+      canvas.removeEventListener('touchmove', onTouchMove);
+      canvas.removeEventListener('touchend', onTouchEnd);
     };
-
   }, []);
 
-  return <canvas ref={canvasRef} className="w-full h-[500px] cursor-crosshair touch-none relative z-10 block" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="w-full touch-none relative z-10 block"
+      style={{ height: 'clamp(280px, 40vw, 480px)' }}
+    />
+  );
 }
