@@ -1,0 +1,32 @@
+export const site = {
+  name: 'Sohaib', fullName: 'Sohaib Elahi', role: 'Brand, web & ecommerce designer',
+  headline: ['I design the brand.', 'Then build its world.'],
+  intro: 'From the first identity to the site it lives on. Six years in design, with development and AI in the mix.',
+  nav: [{ text: 'Work', href: '#work' }, { text: 'About', href: '#about' }, { text: 'Contact', href: '#contact' }],
+  workLink: 'Explore my work', resume: 'Résumé', skip: 'Skip to content',
+  interaction: 'Move slowly. See what follows.', scroll: 'Scroll to explore',
+  dark: 'Dark', light: 'Light', themeLabel: 'Switch color theme', soundOn: 'Sound on', soundOff: 'Sound off', soundLabel: 'Toggle optional interaction sounds',
+  servicesTitle: 'One idea.\nEvery expression.',
+  services: [
+    { name: 'Brand identity', detail: 'Identity systems, packaging and the visual language that holds them together.' },
+    { name: 'Web design & development', detail: 'Design in Figma. Build in the browser, WordPress or Shopify.' },
+    { name: 'Ecommerce design', detail: 'Amazon listings, storefronts and product imagery built around the product.' },
+    { name: 'Email & campaigns', detail: 'Email design and marketing creative, from fragrance launches to everyday brand communication.' },
+  ],
+  aboutTitle: 'A designer,\nwith a builder’s mind.',
+  about: [
+    'I’m Sohaib Elahi, a brand, web and ecommerce designer with six years in design and three in development and AI/ML. I have a BS in Artificial Intelligence.',
+    'My work spans The JAQ Group, Petra Brands / SwiftStart, FIGO Homes, BrandLiners and Dequanis. I work across identity, websites and the places a product meets its audience.',
+  ],
+  experience: [ ['The JAQ Group', 'UK', '2025–present'], ['Petra Brands / SwiftStart', '', '2024–2025'], ['FIGO Homes', 'US', '2022–2025'], ['BrandLiners', '', '2021–2024'], ['Dequanis', '', '2020–2021'] ],
+  portraitAlt: 'Portrait of Sohaib Elahi', galleryLabel: 'Portfolio image gallery',
+  imageAlt: 'Selected portfolio design', email: 'sohaib.e0912003@gmail.com',
+  socials: [{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaib-elahi2023/' }],
+  lab: {
+    title: 'The shape of an idea.', back: 'Back to portfolio', scene: 'Form',
+    scenes: ['Butterfly', 'Orbit', 'Bloom', 'Wave'],
+    controls: { blend: 'Scene handover', speed: 'Speed', density: 'Density', threshold: 'Ink threshold', resolution: 'Grid scale', radius: 'Pointer radius', radial: 'Radial force', tangential: 'Tangential force', decay: 'Decay (ms)', ground: 'Ground intensity', samples: 'Curve samples', falloff: 'Distance falloff' },
+    cost: 'Frame cost', lit: 'Lit cells', reset: 'Reset measurements',
+  },
+  type: {title: 'Type, in its own right.', sans: 'Geist Sans', pixel: 'Geist Pixel', specimen: 'Aa Bb Cc 0123456789', axis: 'Pixel shape', back: 'View portfolio'},
+} as const;
