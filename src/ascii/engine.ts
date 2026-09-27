@@ -7,8 +7,8 @@ export const metrics = { cost: 0, peak: 0, lit: 0, frames: 0, scene: 0 };
 const TAU = Math.PI * 2;
 const glyphs = ' .:;+=x*#%@';
 if (import.meta.env?.DEV && typeof window !== 'undefined') Object.assign(window, { portfolio: { metrics, settings } });
-const darkInk = ['#240806', '#5E1712', '#C9362E', '#F0584C', '#FF8A7E'];
-const lightInk = ['#070606', '#070606', '#070606', '#C9362E', '#C9362E'];
+const darkInk = ['#240806', '#5E1712', '#C9362E', '#F34D40', '#FF8A7E'];
+const lightInk = ['#070606', '#070606', '#070606', '#861c17', '#b5261f'];
 
 // Stateless curves. All sample coordinates are overwritten, never integrated.
 export function sample(scene: number, t: number, layer: number, out: Float32Array) {

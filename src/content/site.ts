@@ -1,8 +1,16 @@
 export const site = {
+  landing: {
+    monogram: 'S.', navigation: 'Main navigation', openMenu: 'Open navigation', closeMenu: 'Close navigation',
+    identity: 'Independent designer & developer',
+    description: 'Brand identities, digital experiences and ecommerce. Designed with intent. Built with curiosity.',
+    contact: 'Let’s talk', work: 'Explore my work',
+    artLabel: 'Change the infinity artwork texture', interaction: 'Move to reveal. Click to change.',
+    disciplines: 'Brand strategy / Digital design / Development', below: 'Selected work below',
+  },
   name: 'Sohaib', fullName: 'Sohaib Elahi', role: 'Brand, web & ecommerce designer',
   headline: ['I design the brand.', 'Then build its world.'],
   intro: 'From the first identity to the site it lives on. Six years in design, with development and AI in the mix.',
-  nav: [{ text: 'Work', href: '#work' }, { text: 'About', href: '#about' }, { text: 'Contact', href: '#contact' }],
+  nav: [{ text: 'Work', href: '#work' }, { text: 'Services', href: '#services' }, { text: 'About', href: '#about' }, { text: 'Contact', href: '#contact' }],
   workLink: 'Explore my work', resume: 'Résumé', skip: 'Skip to content',
   interaction: 'Move slowly. See what follows.', scroll: 'Scroll to explore',
   dark: 'Dark', light: 'Light', themeLabel: 'Switch color theme', soundOn: 'Sound on', soundOff: 'Sound off', soundLabel: 'Toggle optional interaction sounds',

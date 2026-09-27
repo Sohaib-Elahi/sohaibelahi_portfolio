@@ -1,23 +1,31 @@
-# Sohaib portfolio v2
+# Sohaib Elahi — portfolio v2
 
-Vite 6 / React 19 / TypeScript / Tailwind 4. Four runtime dependencies: React, React DOM, GSAP and Lenis.
+Design direction, current state and next phases: [AGENTS.md](AGENTS.md).
+Original asset inventory: [docs/assets.md](docs/assets.md).
+
+## Run
 
 ```sh
-npm install
+npm ci
 npm run dev
 npm run build
-npm run preview
-node --experimental-strip-types scripts/check-engine.ts
+npm run preview -- --port 4173
 ```
 
-Routes: `/` portfolio, `/lab` procedural form controls and frame-cost readout, `/type` self-hosted font proof including the ELSH axis.
+## Project map
 
-All visitor copy is in `src/content/site.ts`. Gallery data contains only image paths and dimensions. The two rails share one component. Mobile and reduced-motion views use native horizontal scrolling. Keyboard arrows navigate a focused rail. Sound is off on every visit and only plays after enabling the toggle.
+- `src/components/Landing.tsx`, `src/landing.css`: current hero and navigation.
+- `src/ascii/ribbon.ts`: hero artwork; `src/lib/scroll.ts`: shared animation and scrolling.
+- `src/App.tsx`, `src/style.css`: application shell and shared styles.
+- `src/components/PortfolioBody.tsx`, `src/body.css`: logo marquee, gallery, capability cards, biography and footer.
+- `src/ascii/body-art.ts`, `src/lib/sound.ts`: section artwork and optional interaction sounds.
+- `src/content/`: visitor copy and gallery manifest.
+- `public/`: browser-ready images, fonts, résumé and metadata assets.
+- `raw/`: original portfolio images, logos, fonts, portrait and résumé; preserve these.
+- `scripts/`: asset/font preparation, prerendering and legacy engine checks. Python preparation requires Pillow/fontTools; asset preparation writes `docs/assets.md`.
 
-One application-owned animation scheduler lives in `src/lib/scroll.ts`. It advances Lenis, GSAP core and the canvas renderer. Native sticky handles gallery pinning; ScrollTrigger maps scroll progress to horizontal translation. The full GSAP CSSPlugin is unnecessary; the small checkPrefix utility covers the native CSS properties used by ScrollTrigger in current browsers.
+`/lab` and `/type` are existing development previews, not design instructions. `npm test` checks the legacy analytic engine. `node_modules/` and `dist/` are generated and ignored by Git.
 
-`src/ascii/engine.ts` evaluates four stateless analytic curve families into a reusable intensity buffer, then draws from an offscreen glyph atlas. It never converts images to ASCII and never integrates particles. Pointer force deforms the sample coordinates. Changing scene uses deterministic threshold erosion and condensation. The canvas also draws reactive service rules.
+The complete V2 includes the entrance reveal, responsive ASCII artwork, scroll-driven portfolio and personal bento. Deployment and the branch workflow are explained in [docs/deployment.md](docs/deployment.md).
 
-Asset preparation: `scripts/prepare-assets.py` requires Pillow with AVIF support. Font preparation: `scripts/prepare-fonts.py` requires fontTools and Brotli. Raw assets are untouched. Shipped WOFF2 subsets cover Latin-1 plus the punctuation used by the site; extend the subset before adding other scripts or languages.
-
-See PROGRESS.md for measured budgets and incomplete physical-device verification. Local desktop/mobile emulation is not a substitute for real Android testing. No production deployment has been performed.
+The animated portrait is generated with `python scripts/prepare-portrait.py` (Pillow and ffmpeg required; `--ffmpeg /path/to/ffmpeg` is supported). The original GIF stays in `raw/portrait/`; only its optimized MP4 and still poster are served.

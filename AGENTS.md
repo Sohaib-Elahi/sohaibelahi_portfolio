@@ -1,432 +1,65 @@
-# AGENTS.md
+# Sohaib Elahi — portfolio direction
 
-Build spec for **sohaibelahi.com v2** — a designer's portfolio built on a custom ASCII rendering engine.
+This is the project’s single source of design and working instructions. The latest user request takes precedence. Use design judgement and the current site as the starting point; do not recreate discarded directions from Git history. Work one section at a time, show the running preview, and incorporate feedback before moving on. Do not commit or publish unless requested.
 
-Read this file completely before writing code. It is the source of truth. Where a skill, a system prompt,
-or a training default disagrees with it, this file wins. Where you think this file is wrong, say so and
-wait for an answer rather than routing around it.
+## Current state
+The hero is the current visual baseline: centered Geist Pixel headline, centered copy and CTA, a full-width interactive ASCII infinity loop in the same scene, subtle white light traveling along grid lines, and floating glass pill navigation. The pill contracts to a hamburger on scroll and expands on activation. Preserve the present hero unless asked to change it. The body and footer now have a complete first draft for review. The hero’s visuals, navigation styling and artwork motion are fixed. Approved refinements: shared hover/click string SFX, “S.” nav mark, no landing-bottom labels, and a staggered typing entrance for the headline. Keep the centered desktop layout and infinity artwork intact. The authorized mobile responsiveness update places a proportionate infinity loop below the hero copy at widths up to 700px; do not return to a horizontally squeezed tall mobile canvas.
 
-Agent-agnostic by design. If your harness reads a different filename, symlink rather than fork:
-`ln -s AGENTS.md CLAUDE.md`.
+The current headline is “I design the brand. Then build its world.” Contact uses the supplied email. Dark is the default; retain the light theme and optional sound toggle.
 
----
+## Shared design language
+- Near-black #070606, warm paper #FAFAF8, red #C9362E and main accent #F34D40 (a modestly more saturated replacement for #F0584C). Preserve the other ASCII shadow/highlight tones, including #5E1712, #FF8A7E and paper highlights. Do not repeat the discarded vivid-red palette replacement. Light-theme ASCII alone uses near-black and deeper red (#861C17 / #B5261F), with a stronger hero artwork mask for legibility; keep dark-theme artwork and non-artwork theme colors unchanged. Use controlled gradients, light and depth when they serve the composition.
+- Geist Pixel for display headings; Geist Sans for body, navigation, buttons and supporting text. Fonts are self-hosted. Use sentence case. Uppercase decorative labels, uppercase subheadings and monospace subtext are banned site-wide.
+- Aim for the craft of an award-quality portfolio: deliberate grids, readable typography, distinctive compositions and polished responses to interaction. This is an aspiration, not an award claim. Avoid generic card grids, decorative labels, filler copy and effects added without purpose.
+- Give each section its own clear boundary, layout and artwork. Keep the palette, spacing rhythm, typography and motion related across sections. No single fixed artwork behind the whole document.
+- Motion is part of the composition: fluid entrances, smooth scroll transitions, subtle hover/press feedback, and playful interactive artwork. Keep text legible and controls usable. On narrow screens, recompose instead of shrinking the desktop design.
 
-## 1. Objective
+## Implementation stack
+Use the installed stack consistently:
+- React 19 and strict TypeScript, built with Vite 6.
+- Tailwind CSS 4 and authored CSS for layout, responsive styling and simple hover/press effects.
+- GSAP with ScrollTrigger for coordinated timelines, scroll-driven sections and stacking cards.
+- Lenis for smooth scrolling. The shared scheduler in `src/lib/scroll.ts` advances Lenis, GSAP and the current artwork; extend it where useful instead of creating competing animation loops.
+- Canvas 2D for the current mathematical ASCII engine. Use mathematical surfaces, image-to-ASCII or other rendering techniques when they improve a section’s design. Keep each artwork scoped to its section or card.
+- Web Audio API for optional interaction SFX.
 
-Sohaib Elahi is a brand, web, and ecommerce designer: 6+ years design, 3+ years development and AI/ML,
-BS in Artificial Intelligence. This site is his portfolio. It exists to make a prospective client believe
-he can build something they have not seen before.
+Motion/Framer Motion, Three.js or React Three Fiber, and Lottie are optional future additions when a concrete design needs them, not default dependencies. GSAP is the existing motion system. Lottie plays authored animations; it is not the smooth-scroll library. Do not install libraries merely to list them in the stack.
 
-The work sample is not the images in the gallery. **The work sample is the site itself.** Specifically, it
-is a custom ASCII system rendered from mathematics — no images traced, no libraries doing the interesting
-part. If that system is generic, the site has failed regardless of how clean the layout is.
+## Interaction and sound
+Interactions should visibly respond: glyph changes, light, depth, texture, deformation, a soft magnetic CTA or a carefully timed card transition. Choose effects appropriate to each element rather than repeating one trick everywhere.
 
-v1 exists at `sohaibelahi-portfolio.vercel.app`. It is not a reference. Do not port from it.
+Develop a consistent family of quiet, short plucked-string-like sounds for deliberate interactions with artwork or controls. Sound defaults to on in both synchronized controls on every load. Browser autoplay rules still apply: initialize/resume audio on the first trusted click or keypress. Muting must prevent playback and activation. Reuse the existing audio context, limit repeated triggers, and keep levels gentle. Scrolling or every pointer movement should not produce a constant soundtrack. Provide the same information and controls without sound.
 
-**What winning looks like:** a visitor moves their pointer, something reacts in a way that feels physical
-and constructed, and they stay to play with it. Then the work loads fast and reads clearly.
+Use a single projection scale for both artwork axes. The hero has a fixed silhouette ratio, service forms use the smaller available dimension, and mobile glyph cells and footer flock sizes scale down with their containers. Canvas backing resolution supports up to 2× device pixel ratio. Preserve proportional portrait media and the pixel pad. Maintain keyboard activation, visible focus, readable contrast and useful reduced-motion states. Scroll-driven cards should have a readable static/mobile arrangement. Keep contact links and copy selectable. Build and inspect desktop/mobile plus the key interaction after each section; keep verification proportional to the change.
 
----
+## Entrance
+The home page opens with a roughly 5.3-second GSAP introduction: “Hi, I’m Sohaib Elahi”, a red full-stop square that moves to the center, and a square aperture revealing the existing hero with a gentle settling zoom. `EntranceReveal.tsx` and `entrance.css` implement it using the existing animation clock. It runs on each fresh home-page load, not section navigation. Skip/Escape, reduced motion, direct section links and a fail-open timeout keep access immediate when needed. The content is inert only while the intro is active; release scroll/focus on every exit. Hold the name before the square travels; crossfade the square into the opening instead of hiding it abruptly. Let the hero zoom settle after the aperture is fully open. Advance the paused timeline by elapsed time through the shared scene scheduler so initialization cannot skip the beginning. Hero typing starts just before the aperture opens. No video preloader or extra animation library.
 
-## 2. Non-negotiables
+## Body draft and next phases
+The user authorized a complete body/footer first draft in this iteration. Current flow:
+1. A subtle, seamless marquee using the five retained company logos (The JAQ Group, FIGO, Petra Brands, BrandLiners and Dequanis), with faded edges. No divider or visible play/pause control; hover/focus pauses it and reduced motion makes it static.
+2. An image-only portfolio: all 24 supplied images appear in a horizontal reel. In standard motion mode, a viewport-height CSS sticky stage maps downward page scrolling to horizontal image movement, then releases into services; upward scrolling reverses it. The existing shared ScrollTrigger/Lenis scheduler drives it. Preserve image proportions, show the visible range and a services skip link, and retain keyboard navigation. Reduced motion and very short screens use the compact manual/swipe gallery with buttons, without pinning. No case-study pages or autoplay.
+3. Five scroll-stacking capability cards: AI images & design first, followed by brand identity, email & marketing, Amazon & ecommerce, and web & digital. The AI card uses interactive ASCII lettering spelling “AI”. Each has its own interactive ASCII form, concise copy and real examples from the résumé.
+4. Animated red ASCII portrait, biography, skills and expandable experience. The portrait uses an optimized muted MP4 from `raw/portrait/MeASCII.gif`, loaded only near the viewport, paused offscreen or in a hidden tab, and replaced by a still WebP for reduced motion. It loops continuously while visible, with no visible playback controls. The About copy highlights versatility across ecommerce, identity and technical work, the AI degree, and the user’s early plans for their own SaaS. About skill pills have subtle cursor tilt, a light sweep, a click/keyboard spring and shared optional string SFX; reduced motion keeps only color/focus feedback. Preserve the original GIF; do not ship its 15.8 MB payload. Under “Where I’ve been building,” four static proof-point cards contain only a value and short label, no descriptions. User-confirmed figures: 300+ AI images in a year, 7 years in graphic design and 40+ DTC brands worked with. The fourth reads “7–9 / Figure brands worked with,” as supplied by the user; this describes client scale, not revenue generated by the designer. Do not invent revenue, CTR or conversion percentages.
+5. Personal bento before the footer: favourite films Interstellar and La La Land, last listened to “K.” by Cigarettes After Sex, a favourite quote (“Jack of all trades is a master of none, but often times better than the master of one”), Pakistan local time (Asia/Karachi, 12-hour clock with visible AM/PM), labelled “Current location” with no Live badge, and dream destinations Dubai, Egypt and Spain. These are user-supplied facts; music is a manually supplied selection, not a live listening feed. A pixel doodle pad adds a playful visitor interaction without invented biography. The music card keeps its dimensions, record artwork and copy while a single play/pause button controls native audio. It plays the full user-supplied MP3 at `/audio/k-cigarettes-after-sex.mp3`, preserved in `raw/audio/`; no iframe, YouTube screen, external-player link or expanded state. Load audio only on activation, reflect actual playback events and handle failures inline. The user supplied the full track through a Google Drive file; preserve that source and the play/pause behavior. Do not restore preview-length audio or extract from YouTube. The bento has a balanced three-card top row (clock, music, films); cinema occupies one column and one row, not a dominant two-row feature. Reflow on mobile without oversized film artwork. Cinema uses the same panel background as other cards, with no white frame; La La Land shows only a moon and stars on a purple-blue sky, no skyline. The book card was replaced with the quote; do not restore it. Keep the vinyl centre white, destination illustrations neutral white/grey (dark ink in light theme), and the active film switch white with dark text (inverted in light theme). These targeted neutrals balance the remaining red accents. Use framed panels, restrained pixel textures, Geist Pixel headings and responsive layouts, consistent with the supplied bento reference. Content is in `src/content/personal.ts`; section code/styles are `PersonalBento.tsx` and `personal.css`.
+6. Contact/footer with a flock of ASCII butterflies, a smaller contact heading (no supporting paragraph) and email/copy action, résumé, LinkedIn and a sound toggle grouped compactly with the email/copy controls (no separate footer utility row), ending with a full-width interactive “Sohaib Elahi” signature. No repeated name/role caption under the portrait.
 
-Nine rules. Everything else in this file is detail underneath them.
+Next: review this draft with Sohaib, refine the gallery/card choreography and section composition, then polish the about/footer transitions. Keep changes scoped to the requested section. Review continuity across themes, screen sizes, input methods and sound/motion preferences before release. Do not publish unless requested.
 
-1. **ASCII is the design language, not a background.** It may be the backdrop, and it may also be
-   dividers, buttons, loaders, section markers, image reveals, cursors, and components that have no name
-   yet. Ambient noise behind text is a failure state, not a deliverable.
-2. **No particle systems. Anywhere.** No arrays of per-entity `{x, y, vx, vy}`, no per-entity
-   integration. Every ASCII form is a field evaluated on a character grid.
-3. **Constructed, never traced.** Forms are built from parametric equations, distance fields, and
-   per-cell math. Running a bitmap through an ASCII converter is not acceptable output.
-4. **One canvas, one animation loop.** Every animation routes through a single ticker. Zero
-   `requestAnimationFrame` calls outside `src/lib/scroll.ts`.
-5. **The Figma file is the design brief.** Read it before designing anything. See §6.
-6. **60/30/10 colour, in two themes.** See §4.1.
-7. **No AI slop in the copy.** See §8.
-8. **Performance budgets are pass/fail**, not aspirations. See §9.
-9. **Ask rather than assume.** Open questions live in §14. Do not invent answers to them.
+Body components live in `src/components/PortfolioBody.tsx`, scoped styling in `src/body.css`, artwork in `src/ascii/body-art.ts`, and optional plucked-string synthesis in `src/lib/sound.ts`. Body canvases subscribe to the shared scheduler. Glyphs repel, swirl, brighten and spring back near the cursor; clicks/keyboard activation send a ripple and change the character palette. Footer butterflies are 20% larger than the first approved flock; they flap, drift and move away from the pointer in a separate artwork area above the contact copy. Keep the approved original ripple/texture click behavior; do not add the discarded click-triggered outward flight. The newer butterfly hint is a copy-only change. Sound defaults to on; actual playback starts after browser-required user activation. Moving across artwork plays quiet, rate-limited string plucks; a stationary pointer stays quiet. Preserve static reduced-motion artwork and touch/keyboard activation.
 
----
+## Content and assets
+Display name: Sohaib Elahi. Creative designer with 7 years in graphic design, 3+ years in development and AI/ML, and a BS in Artificial Intelligence. Experience includes The JAQ Group, Petra Brands / SwiftStart, FIGO Homes, BrandLiners and Dequanis. Do not invent clients, awards, metrics or biography.
 
-## 3. Stack
+Keep landing/shared copy in `src/content/site.ts` and body/footer copy in `src/content/body.ts`. The body draft uses `raw/resume/sohaib-resume-2026.pdf` for roles and dates; Dequanis is 2021–2022. LinkedIn was inaccessible during this build, so do not claim its contents were verified. Sohaib explicitly confirmed creating over 300 AI images in one year, including The JAQ Group’s fragrance email campaigns, using Nano Banana, GPT Image 2 and Higgsfield. These user-confirmed facts support the AI images & design card. Do not add unconfirmed tools, clients or credentials. Email: sohaib.e0912003@gmail.com. LinkedIn: https://www.linkedin.com/in/sohaib-elahi2023/. Résumé: `/resume.pdf`. Preserve original files in `raw/`; browser-ready files live in `public/`. `docs/assets.md` is an inventory, not a design instruction.
 
-```
-Vite 6 · React 19 · TypeScript (strict) · Tailwind v4 · GSAP + ScrollTrigger · Lenis
-```
+## References and tools
+Use references for composition, motion and craft, not copied branding or text:
+- https://www.figma.com/design/k3QPtlQWjtd4ADtpRxY5QE/ASCII-Website-Inspiration
+- https://heynesh.com/
+- https://www.paulkalkbrenner.net/ — smooth zoom-out/settle entrance
+- https://andreigorskikh.digital/
+- https://lukebaffait.fr/ — fluid transitions and footer ASCII
+- http://mariajoaoabrantes.work/
 
-**Runtime dependency budget: 8 maximum.** Every addition needs a written justification in `PROGRESS.md`.
-
-Explicitly not used: Three.js, any WebGL library, framer-motion or motion, pdfjs, Express, nodemailer, any
-component library, any icon package beyond inline SVG.
-
-Résumé is a static `/resume.pdf` link. Contact is `mailto:` unless §14 says otherwise. There is no server.
-
----
-
-## 4. Design system
-
-### 4.1 Colour — the 60/30/10 rule
-
-Two themes, both built on the same rule. A theme toggle ships; the default is an open question (§14).
-
-**Light theme**
-
-| Share | Role | Token |
-|---|---|---|
-| 60% | Surface — page background, generous empty space | `--paper` |
-| 30% | Structure — type, ASCII ink, rules, dark blocks | `--void` |
-| 10% | Accent — one red, used where attention should go | `--red-600` |
-
-**Dark theme**
-
-| Share | Role | Token |
-|---|---|---|
-| 60% | Surface — page background, tinted black not pure | `--void` |
-| 30% | Structure — the ASCII field, headings, rules, atmosphere | red scale |
-| 10% | Accent — primary body copy, the brightest thing present | `--paper` |
-
-The dark theme inverts which colour carries structure. Red stops being a highlight and becomes the ink the
-site is drawn in, spanning the full scale from near-black through to bright; white becomes precious and
-marks only what must be read. This is the more distinctive of the two. Build it first.
-
-**Tokens** (`@theme` in Tailwind v4):
-
-```css
---color-paper:   #FAFAF8;   /* warm white, never #FFF */
---color-void:    #070606;   /* red-tinted black, never #000 */
---color-red-950: #240806;
---color-red-800: #5E1712;
---color-red-600: #C9362E;   /* the brand red, carried from v1 */
---color-red-400: #F0584C;
---color-red-200: #FF8A7E;
---color-mute:    /* derived per theme, one step off the surface */
---color-hair:    /* hairline rules, 8–12% opacity of the structure colour */
-```
-
-Rules: the five red steps exist so that red has depth rather than being one flat highlight. Never introduce
-a sixth. No gradients as decoration — if a surface needs texture, the ASCII field provides it. No colour
-outside these tokens, including in the ASCII glyph ramp.
-
-Both themes must be checked for contrast (§10), and the ASCII intensity ramp needs separate tuning per
-theme — a ramp that reads on black will be mud on white.
-
-### 4.2 Type
-
-- **Geist Pixel** — headings only, 28px and above, never body text. Self-host the woff2 in
-  `public/fonts/`; do not install the `geist` npm package, its `next/font` wrappers do not work in Vite.
-  Check at build time whether the variable `ELSH` axis ships before deciding how many files to load.
-- **Geist Sans** — everything else.
-- **No third family. Geist Mono is banned from the UI**, including in the ASCII canvas, which draws from a
-  pre-rendered glyph atlas rather than from live text.
-
-Scale: a clear jump between levels, no more than six steps total. Body no smaller than 16px.
-
-### 4.3 Space, shape, motion
-
-- Two border radii exist: `0` and `12px`. Nothing else.
-- Motion tokens: `120ms` (state), `240ms` (element), `520ms` (section), all on
-  `cubic-bezier(0.22, 1, 0.36, 1)`. Bounce and elastic curves are banned.
-- Scroll-driven motion is the default. Entrance animations are the exception, not the rule — uniform
-  fade-up-on-every-section is a banned pattern.
-- `prefers-reduced-motion` renders one composed static frame and stops. That frame must still look good.
-
----
-
-## 5. The ASCII system
-
-### 5.1 What it is
-
-A single `<canvas>` behind and within the page, driven by one loop, rendering a character grid. Two layers:
-
-- **Ground** — an ambient field. Deliberately understated. It is atmosphere.
-- **Figure** — a constructed form that dominates the field. This is the artwork.
-
-A section with ground and no figure is unfinished. Drifting noise behind text is a gradient with extra
-steps.
-
-### 5.2 Technique
-
-**Grid:** 14px cells desktop, 15px tablet, 18px mobile. DPR capped at 1.5 desktop, 1.25 mobile. Forms
-render into a **half-size sub-grid inside their own bounding box** (7px / 9px), because silhouettes need
-resolution that ambient fields do not.
-
-**Rendering:** a pre-rendered glyph atlas (roughly 11 glyphs × 5 colour steps), `drawImage` per lit cell.
-Full `clearRect` then sparse draw. Dirty-rect diffing only if profiling demands it.
-
-**Intensity buffer:** one `Float32Array`, allocated at init, `fill()`-reset per frame. **Zero allocations
-in the steady-state loop** — prove it with a flat line on a DevTools allocation timeline.
-
-**The recommended technique for line-based forms — scatter, not gather:**
-
-Walk a parametric curve in N steps. Project each sample to grid space. Splat it into a scratch buffer: for
-the 3×3 cells around the sample, keep `min(existing, distance)`, and record the sample's depth and arc
-position. Intensity is then `falloff(distance)` modulated by depth.
-
-Cost is `N × 9` rather than `cols × rows × N` — roughly 3,600 operations per frame, **independent of
-viewport size**. This single decision is what makes a complex form affordable on a mid-range phone. Use it
-wherever a form can be expressed as a curve, a surface, or a signed distance field.
-
-**Motion without moving anything:** run a travelling brightness wave along arc position,
-`0.5 + 0.5·sin(arc·k − t·ω)`, with two or three harmonics so it does not read as one repeating band. The
-form appears to circulate while no state advances.
-
-**Interaction: warp the space, not the object.** Displace sample coordinates before projection with a
-field centred on the pointer — a radial term plus a tangential term scaled by pointer velocity, multiplied
-by an eased strength scalar that decays over roughly 600ms after the pointer stops. Applying displacement
-before the splat is what makes a form genuinely deform rather than shift. Tune the falloff radius, the
-radial/tangential mix, and the decay by hand until it feels physical. This is the site's headline
-interaction and it deserves a full session.
-
-**Ink budget:** cap lit cells at ~2600 desktop, ~1100 mobile. Exceeding it is a bug, not a look.
-
-**Section handover:** forms do not cross-fade. The outgoing form erodes (falloff widens while a noise
-threshold eats into it) as the incoming form condenses by the same process reversed, over a ~15vh band. At
-most two forms are allocated at once; `init()` on approach, `dispose()` two sections away.
-
-### 5.3 What to build — deliberately open
-
-**This spec does not prescribe a catalogue of forms.** Earlier drafts did, and that was a mistake: it
-turned a creative problem into a checklist.
-
-What each section gets is derived from the Figma references (§6) and from your own judgement about what
-the mathematics can do well. The references lean toward complex, organic, mathematically-generated
-patterns — butterflies, flowers, orbital systems, wave interference, phyllotaxis, strange attractors,
-knots — because that is the ambition: forms with interior logic, not decoration.
-
-Freedoms you explicitly have:
-
-- Choose a different form for each section, or let one form evolve across the whole scroll.
-- Use ASCII for **components**, not only backdrops: dividers, hover states, loaders, the cursor, gallery
-  transitions, a section index, the footer wordmark. Invent component types that do not exist yet.
-- Decide whether the portrait photograph becomes ASCII at all. It may be stronger as a clean photograph
-  against an ASCII field. Make the call, show both if you are unsure.
-- Propose something not discussed here, if it is better. Show it before committing a phase to it.
-
-Constraints that still bind: §2 rules 1–4, the performance contract in §9, and the quality bar below.
-
-### 5.4 Quality bar — every form must pass
-
-- **Silhouette test.** Screenshot at 25% scale. The form must still be identifiable. If it turns to noise,
-  the falloff is too wide or the grid too coarse.
-- **Poke test.** Pointer response visible within 2 frames, and it decays rather than snapping.
-- **Construction test.** If the output could have been produced by running an image through an ASCII
-  converter, it is not finished. There must be interior logic a bitmap cannot have.
-- **No-particles test.** Search the source for an array of per-entity state. If one exists, rewrite as a
-  field. The only permitted arrays are per-column or per-sample scratch buffers reset every frame.
-- **Screenshot test.** Look at it yourself before showing it. If you cannot render it in your environment,
-  say so at the start of the phase.
-
-### 5.5 Performance contract
-
-| Metric | Desktop | Mobile |
-|---|---|---|
-| Engine frame cost | ≤5ms | ≤7ms |
-| During section handover | ≤8ms | ≤8ms |
-| Frame rate | 60fps | ≥50fps |
-
-Measured on a real mid-range Android over a preview deployment, not in device emulation. Emulation lies
-about GPU and thermal behaviour.
-
----
-
-## 6. Figma — the design brief
-
-Sohaib maintains a Figma file of references: Pinterest boards and collected work showing complex ASCII
-patterns and animations, organised by the section each belongs to. It is connected over MCP.
-
-**Read it in Phase 0, before designing anything.** Then produce `DESIGN-BRIEF.md` containing, per section:
-
-1. **What the references show** — described concretely. "Radial ASCII bloom, density falling off from a
-   bright core, roughly 8-fold symmetry" is useful. "Modern and clean" is not.
-2. **The specific ingredient to take** — layout structure, motion behaviour, density, symmetry, contrast,
-   or rhythm. One or two per reference, named precisely.
-3. **The mathematics that would produce it** — the actual approach: which curve, field, or distance
-   function, and how it maps to intensity. This is where the reference becomes buildable.
-4. **What you are deliberately not taking**, and why.
-
-Rules for reading Figma:
-
-- References are **inspiration, not templates**. Extract the principle; do not reproduce a frame. If a
-  reference is someone's finished work, taking its structure wholesale is plagiarism and it will be
-  obvious.
-- Frame names and any annotations Sohaib has written are instructions. Read them.
-- If a section has no references, say so rather than inventing a direction for it.
-- If the Figma MCP connection is unavailable, **stop and tell Sohaib**. Do not proceed on guesswork — the
-  entire point of this workflow is that the design direction comes from him.
-
-`DESIGN-BRIEF.md` is reviewed and approved before Phase 1 starts. Once approved it joins this file as
-binding context.
-
----
-
-## 7. Sections
-
-Structure, not design. Design comes from §6.
-
-- **Header** — minimal, persistent. Theme toggle lives here.
-- **Hero** — the site's strongest ASCII moment and its headline interaction. One orchestrated entrance,
-  ~900ms, once. Everything after is scroll- or pointer-driven.
-- **Work / gallery** — **images only**. No titles, no client names, no tags, no years, no categories, no
-  lightbox, no detail pages, no hover captions. If you write a `title` field into the image data you have
-  misread this. One component, used twice with a direction parameter: desktop is a pinned horizontal rail,
-  mobile is native scroll-snap with no pinning.
-- **Services** — what he does, compressed. No pill tags, no icon cards, no hover lift. A pill grid here is
-  exactly the pattern the brief calls slop.
-- **About** — two short paragraphs (65 words combined, maximum), the portrait, and a plain list of
-  experience separated by hairline rules.
-- **Footer / contact** — the name, the email as a selectable `mailto:` link, social links. Nothing else.
-
----
-
-## 8. Copy
-
-All copy lives in one typed object at `src/content/site.ts`. No string literals in components.
-
-**Rules:** sentence case throughout. No eyebrow labels above headings. No em dashes. No invented metrics or
-fake client counts. Every sentence must be something only Sohaib could say — if it would sit unchanged on
-another designer's portfolio, rewrite it.
-
-**Banned vocabulary:** crafting, bridging, seamless, elevate, journey, passionate about, at the
-intersection of, pixel-perfect, cutting-edge, leverage, empower, unlock, transform your, we believe,
-let's create something amazing.
-
-**Résumé facts** (do not invent beyond these):
-
-| Company | Location | Period |
-|---|---|---|
-| The JAQ Group | UK | 2025–present |
-| Petra Brands / SwiftStart | — | 2024–2025 |
-| FIGO Homes | US | 2022–2025 |
-| BrandLiners | — | 2021–2024 |
-| Dequanis | — | 2020–2021 |
-
-v1's hero line was "Creativity Comes From Within". It is a fortune cookie. Propose three alternatives in
-the hero phase and wait for Sohaib to choose.
-
----
-
-## 9. Budgets — pass/fail
-
-| Metric | Target |
-|---|---|
-| JS, gzipped | ≤120KB |
-| Fonts, total | ≤120KB |
-| LCP, mobile 4G | ≤2.0s |
-| CLS | ≤0.02 |
-| INP | ≤200ms |
-| Lighthouse performance | ≥90 |
-| Lighthouse accessibility | ≥95 |
-| Runtime dependencies | ≤8 |
-
-Plus the engine contract in §5.5. Report measured numbers at the end of every phase. Do not report a phase
-as done because the code compiles.
-
----
-
-## 10. Accessibility
-
-- Contrast checked in **both themes**. Red on black needs care; the brightest red steps are for large text
-  and ASCII only, never for body copy.
-- The ASCII canvas is `aria-hidden`. Anything it depicts that carries meaning (the footer wordmark) has
-  visually-hidden real text behind it.
-- Full keyboard path through the site, visible focus rings, no keyboard trap in the pinned gallery.
-- The horizontal rail is keyboard-navigable or has an equivalent vertical fallback.
-- No `cursor: none`, no global `select-none`. The email address must be selectable.
-- `prefers-reduced-motion` honoured throughout (§4.3).
-
----
-
-## 11. Skills
-
-Four optional packs. Precedence, highest first: **this file → `DESIGN-BRIEF.md` → Sohaib in session →
-impeccable → taste-skill → emilkowalski → ponytail.**
-
-```bash
-npx impeccable install                                  # then /impeccable init
-npx skills add https://github.com/Leonxlnx/taste-skill
-npx skills@latest add emilkowalski/skills
-# ponytail: install via your harness's plugin system, or copy its ruleset in manually
-```
-
-taste-skill dials: `DESIGN_VARIANCE: 7`, `MOTION_INTENSITY: 7`, `VISUAL_DENSITY: 3`.
-
-**None of these are required.** They raise the ceiling; this file sets the floor. If one will not install,
-say so and continue — but run the equivalent check by hand:
-
-| Instead of | Do this |
-|---|---|
-| `/impeccable critique` | Re-read §4 and §8, list every element that fails a rule |
-| `/impeccable audit` | Walk §9 and §10 as an explicit checklist |
-| `npx impeccable detect src/` | Works standalone, no agent needed. Always run it. |
-| `/ponytail-review` | List everything in the diff removable without losing a requirement |
-| emil's `animate` | Check every animation against §4.3 |
-
-**Pre-resolved conflicts:** detectors flag "near-black plus one bright accent" and "overused fonts" as
-AI tells. Both are deliberate brief requirements here. Waive with an inline comment and a reason. Ponytail
-pushes toward less code — accept that everywhere except the ASCII engine, which is the product.
-
----
-
-## 12. Phases
-
-One phase per session. Fresh context each time, carrying only this file, `DESIGN-BRIEF.md`, and the last
-`PROGRESS.md` entry. Use planning mode if your harness has one. Each phase ends with budgets measured, a
-deletion pass, `npx impeccable detect src/` clean or waived, one squashed commit, and **a stop** — show
-Sohaib before continuing.
-
-| # | Phase | Done when |
-|---|---|---|
-| **0** | **Figma + setup.** Read the Figma file, write `DESIGN-BRIEF.md` (§6). Inventory `raw/`, write `ASSETS.md`, convert images to AVIF+WebP. Scaffold the stack, wire both theme token sets, self-host and prove both fonts. | `DESIGN-BRIEF.md` approved by Sohaib. A blank page renders in both themes with fonts proven. |
-| **1** | **Engine.** `src/ascii/` standalone on a `/lab` route with live controls for every constant. Atlas renderer, composite pipeline, ground fields, ticker, reduced-motion and low-end paths. Then the **hero form**, built to the standard the rest will follow. | §5.5 passes on desktop and a real phone. Hero form passes all five tests in §5.4. Allocation timeline is flat. |
-| **2** | **ASCII vocabulary.** The remaining forms and components from `DESIGN-BRIEF.md`, still on `/lab`. Section handover (§5.2). | Every form passes §5.4. Scrubbing between scenes shows erode-and-condense with no popping. |
-| **3** | **Shell + hero.** Header, theme toggle, scroll wiring, mounted canvas, hero section with its entrance. Three H1 options proposed, one chosen. | LCP and CLS measured against §9 with the hero alone. |
-| **4** | **Gallery.** Images only. Pinned rail desktop, scroll-snap mobile. | FPS during scrub, CLS after load, total image weight, all reported. |
-| **5** | **Services + about.** Both per §7. | `/impeccable critique` run and its findings fixed. |
-| **6** | **Footer + contact.** | Email selectable. Wordmark has real text behind it. |
-| **7** | **Themes + ship.** Both themes verified across every section including ASCII ramp tuning. Animation review, audit, detect, metadata, favicon, OG image. Full Lighthouse: mobile, incognito, 4× CPU throttle. | §13 walked line by line, honestly. |
-
----
-
-## 13. Definition of done
-
-- [ ] Zero particle systems in `src/`. No per-entity state arrays exist.
-- [ ] Every ASCII form passes all five tests in §5.4.
-- [ ] Exactly one animation loop. No `requestAnimationFrame` outside `src/lib/scroll.ts`.
-- [ ] Zero allocations in the steady-state frame, proven.
-- [ ] Both themes complete, contrast-checked, ASCII ramp tuned per theme.
-- [ ] Every §9 budget met and measured, not estimated.
-- [ ] ≤8 runtime dependencies.
-- [ ] Gallery has no titles, tags, or detail views.
-- [ ] All copy from `src/content/site.ts`, passing §8.
-- [ ] `prefers-reduced-motion` path renders a static frame that looks intentional.
-- [ ] Tested on a real mid-range Android over a preview deploy.
-- [ ] No console errors or warnings in production build.
-- [ ] `ASSETS.md`, `DESIGN-BRIEF.md`, `PROGRESS.md` all current.
-
----
-
-## 14. Open questions — ask, do not assume
-
-1. **Default theme** — light or dark on first load?
-2. **H1 line** — three options proposed in Phase 3, Sohaib chooses.
-3. **Contact** — `mailto:` only, or a real form? (A form means a serverless function and a mail provider.)
-4. **Gallery images** — how many, and what aspect ratios? Determines editorial-varied versus uniform rail.
-5. **"SFX on micro-animations"** — actual audio (WebAudio-generated, no files, off by default with a
-   toggle), or purely visual feedback?
-6. **Portrait** — your call per §5.3, but show Sohaib both treatments before committing.
-
----
-
-## 15. Notes for the executing agent
-
-- Build the engine before the pages. If the engine is wrong, the pages are wasted work.
-- The forms are the portfolio's actual work sample. The copy and photographs support that judgement; the
-  ASCII is what makes it.
-- When in doubt about adding something: don't. Slop is almost always addition.
-- v1's problem was not too few effects. It had more than this site will. It had too many, fighting each
-  other. v2 is one good idea executed precisely, everywhere.
-- Report honestly. A missed budget or a check you could not run gets written down plainly. An overstated
-  "done" costs more than a delay, because the next phase builds on top of it.
-- If something here turns out to be technically wrong once you are in the code, name the section, say why,
-  and propose an alternative. Do not substitute quietly.
+There are no required project-local skill packs, agent roles or automatic design hooks. Use the model’s design and engineering judgement. Optional tool-specific guidance can be loaded when needed, such as Figma’s required tool instructions. Do not reinstall conflicting prompt packs or impose Ponytail. Keep future project guidance here rather than creating parallel prompt, plan or design-rule documents.

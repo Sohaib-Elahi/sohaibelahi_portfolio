@@ -26,6 +26,7 @@ with Image.open(root/'raw/portrait/me.webp') as im:
  im=im.convert('RGB'); im.thumbnail((1000,1000))
  im.save(root/'public/images/portrait.avif',quality=70)
  im.save(root/'public/images/portrait.webp',quality=85)
-(root/'ASSETS.md').write_text('# Raw asset inventory\n\nSHA-256 identifies exact duplicates. Source files remain untouched. Portfolio derivatives preserve aspect ratio, cap their longest edge at 1600px and ship AVIF with WebP fallback. Files under 1200px wide are flagged, not upscaled. Gallery selection remains pending.\n\n| File | Dimensions | Aspect | Bytes | Notes |\n| --- | --- | --- | --- | --- |\n'+'\n'.join(rows)+'\n\nFonts: supplied Geist Sans wght TTF and Geist Pixel ELSH TTF; build inspection recorded in PROGRESS.md. Résumé: raw/resume/sohaib-resume-2026.pdf.\n')
+(root/'docs').mkdir(exist_ok=True)
+(root/'docs/assets.md').write_text('# Raw asset inventory\n\nSHA-256 identifies exact duplicates. Source files remain untouched. Portfolio derivatives preserve aspect ratio, cap their longest edge at 1600px and ship AVIF with WebP fallback. Files under 1200px wide are flagged, not upscaled. The gallery uses all unique supplied portfolio images.\n\n| File | Dimensions | Aspect | Bytes | Notes |\n| --- | --- | --- | --- | --- |\n'+'\n'.join(rows)+'\n\nFonts: supplied Geist Sans wght TTF and Geist Pixel ELSH TTF; self-hosted web fonts are in public/fonts/. Résumé: raw/resume/sohaib-resume-2026.pdf.\n')
 (root/'src/content/images.json').write_text(json.dumps(gallery,indent=2)+'\n')
 print('Unique gallery images:',len(gallery)); print('Derivative bytes:',sum(p.stat().st_size for p in (root/'public/images').iterdir()))
