@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject, type PointerEvent } from 'react';
 import { site } from '../content/site';
+import { StarIcon } from './DecorativeIcons';
 
 export function Navigation({ preferences }: { preferences: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
@@ -51,7 +52,7 @@ export function Landing({ canvasRef }: { canvasRef: RefObject<HTMLCanvasElement 
   return <section className="landing" aria-labelledby="landing-title">
     <div className="hero-grid" aria-hidden="true">{[0, 1, 2, 3].map(i => <span className={`power-line power-vertical line-${i}`} key={`v${i}`} />)}{[0, 1, 2].map(i => <span className={`power-line power-horizontal line-${i}`} key={`h${i}`} />)}</div>
     <div className="landing-heading">
-      <div className="identity-line"><span className="identity-mark" aria-hidden="true">✳</span><span>{site.fullName}<span className="identity-divider">/</span>{site.landing.identity}</span></div>
+      <div className="identity-line"><span className="identity-mark" aria-hidden="true"><StarIcon /></span><span>{site.fullName}<span className="identity-divider">/</span>{site.landing.identity}</span></div>
       <InteractiveHeadline />
       <p className="landing-description">{site.landing.description}</p>
       <div className="landing-actions"><a className="primary-cta" onPointerMove={magnet} onPointerLeave={event => { event.currentTarget.style.translate = ''; }} href={`mailto:${site.email}`}>{site.landing.contact}<span aria-hidden="true">↗</span></a><a className="secondary-cta" href="#work">{site.landing.work}<span aria-hidden="true">↓</span></a></div>

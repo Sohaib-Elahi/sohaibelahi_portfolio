@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { personal } from '../content/personal';
+import { StarIcon, PlaneIcon } from './DecorativeIcons';
 import { playSound } from '../lib/sound';
 import '../personal.css';
 
@@ -32,7 +33,7 @@ function Cinema() {
   }
   return <article className="personal-card personal-cinema">
     <div className={`cinema-scene ${movie ? 'cinema-night' : 'cinema-space'}`} onPointerMove={move} onPointerLeave={event => { event.currentTarget.style.setProperty('--scene-x', '0px'); event.currentTarget.style.setProperty('--scene-y', '0px'); }}>
-      <div className="personal-card-top"><span>Favourite films</span><span aria-hidden="true">✳</span></div>
+      <div className="personal-card-top"><span>Favourite films</span><span aria-hidden="true"><StarIcon /></span></div>
       <div className="cinema-universe" aria-hidden="true"><div className="cinema-orbit" /><div className="cinema-horizon" />
         <div className="cinema-stars">{Array.from({ length: 28 }, (_, i) => <i key={i} style={{ left: `${i * 37 % 100}%`, top: `${i * 23 % 80}%`, opacity: .2 + (i % 4) * .2 }} />)}</div>
       </div>
@@ -75,7 +76,7 @@ function Music() {
 
 function FavouriteQuote() {
   return <article className="personal-card personal-quote">
-    <div className="personal-card-top"><span>Favourite quote</span><span aria-hidden="true">✳</span></div>
+    <div className="personal-card-top"><span>Favourite quote</span><span aria-hidden="true"><StarIcon /></span></div>
     <span className="quote-mark" aria-hidden="true">“</span>
     <blockquote>{personal.quote}</blockquote>
   </article>;
@@ -86,7 +87,7 @@ function Travel() {
   return <article className="personal-card personal-travel">
     <div className="personal-card-top"><span>Places I dream of</span><span aria-hidden="true">↗</span></div>
     <div className={`travel-landmark travel-place-${destination}`} aria-hidden="true"><i /><i /><i /><i /><i /><span /></div>
-    <div className="travel-route"><span>Pakistan</span><span aria-hidden="true">··········· ✈ ···········</span><h3 aria-live="polite">{personal.destinations[destination]}</h3></div>
+    <div className="travel-route"><span>Pakistan</span><span aria-hidden="true">··········· <PlaneIcon /> ···········</span><h3 aria-live="polite">{personal.destinations[destination]}</h3></div>
     <div className="travel-choices" role="group" aria-label="Explore dream destinations">{personal.destinations.map((place, i) => <button aria-pressed={destination === i} key={place} onClick={() => { setDestination(i); playSound('tap', i); }}>{place}</button>)}</div>
   </article>;
 }
@@ -119,7 +120,7 @@ function PixelPad() {
     const y = Math.floor((event.clientY - rect.top) / rect.height * 18);
     if (x >= 0 && x < 28 && y >= 0 && y < 18) { pixels.current.add(y * 28 + x); draw(); }
   }
-  return <article className="personal-card personal-pixels"><div className="personal-card-top"><span>A little room to play</span><span aria-hidden="true">✳</span></div>
+  return <article className="personal-card personal-pixels"><div className="personal-card-top"><span>A little room to play</span><span aria-hidden="true"><StarIcon /></span></div>
     <button className="pixel-pad" aria-label="Pixel doodle pad. Drag to draw, or press Enter to add a spark." onPointerDown={event => { event.currentTarget.setPointerCapture(event.pointerId); paint(event); playSound('art'); }} onPointerMove={paint} onClick={event => {
       if (event.detail !== 0) return;
       const x = 2 + Math.floor(Math.random() * 24), y = 2 + Math.floor(Math.random() * 14);

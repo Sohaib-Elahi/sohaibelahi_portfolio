@@ -11,3 +11,7 @@ html { scrollbar-gutter: stable; }
 [data-entry=pending] .landing :is(.identity-line,h1,.landing-description,.landing-actions,.ribbon-composition,.headline-letter) { animation-play-state: paused; }
 @media(max-width:600px) { .entrance-greeting { padding: 16px; }.entrance-greeting>div { font-size: 12vw; }.entrance-skip { right: 16px; bottom: 16px; } }
 @media(prefers-reduced-motion:reduce) { .entrance { display: none; } }
+
+/* WebKit can retain paused per-letter opacity after the intro. Release every
+   entrance effect to its readable base style on completion, skip or timeout. */
+[data-entry=ready] .landing :is(.identity-line,h1,.landing-description,.landing-actions,.ribbon-composition,.headline-letter) { animation: none; }
