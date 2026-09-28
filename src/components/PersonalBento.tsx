@@ -69,7 +69,7 @@ function Music() {
       onWaiting={() => setLoading(true)}
       onError={() => { setPlaying(false); setLoading(false); setError(true); }} />
     <div className="music-track"><div className="music-record" aria-hidden="true"><i /></div><div><h3>{personal.song}</h3><p>{personal.artist}</p></div>
-      <button className="music-play" aria-label={`${playing || loading ? 'Pause' : 'Play'} K. by Cigarettes After Sex`} aria-pressed={playing} onClick={() => void togglePlayback()}><span aria-hidden="true">{playing || loading ? 'Ⅱ' : '▶'}</span></button></div>
+      <button className="music-play" aria-label={`${playing || loading ? 'Pause' : 'Play'} K. by Cigarettes After Sex`} aria-pressed={playing} onClick={() => void togglePlayback()}><svg className="decoration-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d={playing || loading ? 'M6 4h4v16H6zM14 4h4v16h-4z' : 'M7 4v16l13-8z'} /></svg></button></div>
     <div className="music-bottom"><span role="status">{error ? 'Couldn’t load. Retry.' : loading ? 'Loading song…' : playing ? 'Playing' : 'Listen to K.'}</span><span className="music-wave" aria-hidden="true">{Array.from({length:16},(_,i)=><i key={i} style={{height: `${5 + (i * 7 % 19)}px`, animationDelay: `${i * -83}ms`}} />)}</span></div>
   </article>;
 }

@@ -159,6 +159,8 @@ header.floating-nav { position: fixed; top: 34px; left: 50%; right: auto; transf
  .landing .headline-letter { animation: headline-type 100ms steps(1,end) both; animation-delay: calc(450ms + var(--letter-order)*28ms); }
 }
 @keyframes headline-type { from { opacity: 0; } to { opacity: 1; } }
+/* Touch/narrow screens reveal the complete headline without staggered letters. */
+@media(max-width:700px),(hover:none),(pointer:coarse) { .landing h1,.landing .headline-letter { animation: none; } }
 
 /* Keep the copy clear, but let the light-theme loop retain a solid silhouette. */
 :root[data-theme=light] .ribbon-stage canvas { mask-image: radial-gradient(ellipse 48% 58% at 50% 46%,transparent 30%,#000 72%); }
