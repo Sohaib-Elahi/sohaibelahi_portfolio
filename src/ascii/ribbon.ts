@@ -25,10 +25,10 @@ export function createRibbon(canvas: HTMLCanvasElement) {
     ink.textAlign = 'center'; ink.textBaseline = 'middle';
     for (let color = 0; color < colors.length; color++) {
       ink.fillStyle = ink.strokeStyle = colors[color];
-      ink.lineWidth = .85;
+      ink.lineWidth = theme === 'light' ? 1 : .25;
       for (let glyph = 0; glyph < 10; glyph++) {
-        // Dark hero stays unchanged; light ink needs firmer edges when downsampled.
-        if (theme === 'light') ink.strokeText(alphabets[texture][glyph], glyph * 20 + 10, color * 20 + 10);
+        // Slightly reinforce cached glyph edges without changing the shaded palette.
+        ink.strokeText(alphabets[texture][glyph], glyph * 20 + 10, color * 20 + 10);
         ink.fillText(alphabets[texture][glyph], glyph * 20 + 10, color * 20 + 10);
       }
     }

@@ -1,7 +1,7 @@
 export const site = {
   landing: {
     monogram: 'S.', navigation: 'Main navigation', openMenu: 'Open navigation', closeMenu: 'Close navigation',
-    identity: 'Independent designer & developer',
+    identity: 'Creative designer & developer',
     description: 'Brand identities, digital experiences and ecommerce. Designed with intent. Built with curiosity.',
     contact: 'Let’s talk', work: 'Explore my work',
     artLabel: 'Change the infinity artwork texture', interaction: 'Move to reveal. Click to change.',
