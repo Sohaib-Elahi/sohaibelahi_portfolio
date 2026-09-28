@@ -19,13 +19,18 @@ export function createRibbon(canvas: HTMLCanvasElement) {
     theme = document.documentElement.dataset.theme || 'dark';
     const colors = theme === 'dark'
       ? ['#240806', '#5E1712', '#C9362E', '#F34D40', '#FF8A7E', '#FAFAF8']
-      : ['#493b39', '#201a19', '#861c17', '#b5261f', '#121010', '#070606'];
+      : ['#24100c', '#080606', '#9c1b10', '#c52b1b', '#050303', '#000000'];
     atlas.width = 10 * 20; atlas.height = colors.length * 20;
     ink.font = '400 17px "Geist Pixel"';
     ink.textAlign = 'center'; ink.textBaseline = 'middle';
     for (let color = 0; color < colors.length; color++) {
-      ink.fillStyle = colors[color];
-      for (let glyph = 0; glyph < 10; glyph++) ink.fillText(alphabets[texture][glyph], glyph * 20 + 10, color * 20 + 10);
+      ink.fillStyle = ink.strokeStyle = colors[color];
+      ink.lineWidth = .85;
+      for (let glyph = 0; glyph < 10; glyph++) {
+        // Dark hero stays unchanged; light ink needs firmer edges when downsampled.
+        if (theme === 'light') ink.strokeText(alphabets[texture][glyph], glyph * 20 + 10, color * 20 + 10);
+        ink.fillText(alphabets[texture][glyph], glyph * 20 + 10, color * 20 + 10);
+      }
     }
   }
   function resize() {
@@ -85,7 +90,8 @@ export function createRibbon(canvas: HTMLCanvasElement) {
       const x = i % columns * cell, y = Math.floor(i / columns) * cell;
       const proximity = Math.max(0, 1 - Math.hypot(x / width - pointerX, y / height - pointerY) / 0.23);
       const shimmer = reduced.matches ? 0 : Math.floor(time * 6 + i * 0.17) % 3;
-      const glyph = Math.min(9, Math.max(1, Math.floor(value * 9) + (proximity > 0.3 ? shimmer : 0)));
+      const inkWeight = theme === 'light' ? 1 : 0;
+      const glyph = Math.min(9, Math.max(1 + inkWeight, Math.floor(value * 9) + inkWeight + (proximity > 0.3 ? shimmer : 0)));
       const color = Math.min(5, Math.floor(value * 5.8));
       context.drawImage(atlas, glyph * 20, color * 20, 20, 20, x, y, cell + 0.6, cell + 0.6);
     }

@@ -4,6 +4,11 @@ export type ArtKind = 'bloom' | 'signal' | 'cube' | 'surface' | 'flock' | 'ai';
 export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck: (note: number) => void) {
   const ctx = canvas.getContext('2d')!;
   const host = canvas.parentElement!;
+  const card = host.closest<HTMLElement>('.body-service-card');
+  const atlas = document.createElement('canvas');
+  const ink = atlas.getContext('2d')!;
+  let atlasSlot = 1, atlasDpr = 1;
+  let interacting = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let width = 1, height = 1, columns = 1, rows = 1, cell = 7;
   let values = new Float32Array(0);
@@ -16,6 +21,25 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
   let rippleStart = -10000, rippleX = .5, rippleY = .5;
   let letterPoints: { x: number; y: number }[] = [];
   const alphabets = [' .:+*x#@', ' .:;+X%@', ' .·+=*#@'];
+  // Rasterize the variable-font glyphs once per size/theme/texture, not every frame.
+  function makeAtlas() {
+    const colors = theme === 'light'
+      ? ['#41120c', '#9c1b10', '#c52b1b', '#000000'] : ['#8c241c', '#f34d40', '#ff6147', '#ffffff'];
+    atlasDpr = Math.min(devicePixelRatio, 2);
+    atlasSlot = Math.ceil((cell + 5) * atlasDpr);
+    atlas.width = atlasSlot * 8; atlas.height = atlasSlot * 4;
+    ink.font = `400 ${(cell + 1) * atlasDpr}px "Geist Pixel"`;
+    ink.textAlign = 'center'; ink.textBaseline = 'middle';
+    ink.lineWidth = (theme === 'light' ? .32 : .16) * atlasDpr;
+    colors.forEach((color, row) => {
+      ink.fillStyle = ink.strokeStyle = color;
+      for (let glyph = 1; glyph < 8; glyph++) {
+        const x = (glyph + .5) * atlasSlot, y = (row + .5) * atlasSlot;
+        ink.strokeText(alphabets[texture][glyph], x, y);
+        ink.fillText(alphabets[texture][glyph], x, y);
+      }
+    });
+  }
   function resize() {
     width = host.clientWidth; height = host.clientHeight;
     cell = kind === 'flock' ? Math.max(2.5, Math.min(4, width / 170)) : Math.max(3, Math.min(5, Math.min(width, height) / 65));
@@ -41,6 +65,8 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
         if (pixels[(Math.floor(y) * mask.width + Math.floor(x)) * 4 + 3] > 90) letterPoints.push({ x, y });
       }
     }
+    theme = document.documentElement.dataset.theme || 'dark';
+    makeAtlas();
     draw(lastTime, true);
   }
   function raster(px: number, py: number, brightness: number) {
@@ -55,26 +81,34 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
     raster(width * .5 + (x * Math.cos(angle) + z * Math.sin(angle)) * scale,
       (height - 20) * .5 + (y + z * (pointerY - .5) * influence * .4) * scale, brightness);
   }
+  // The wing outline is invariant; keep its expensive trigonometry out of each frame.
+  const wingOutline = Array.from({ length: 240 }, (_, i) => {
+    const a = i / 240 * Math.PI * 2;
+    const r = (Math.exp(Math.cos(a)) - 2 * Math.cos(4 * a) - Math.pow(Math.sin(a / 12), 5)) / 4;
+    return { x: Math.sin(a) * r, y: -Math.cos(a) * r, angle: a * 4 };
+  });
   function flock(t: number) {
-    const count = width < 600 ? 3 : width < 900 ? 5 : 7;
+    const compact = width < 600;
+    const count = width < 900 ? 5 : 7;
     for (let bird = 0; bird < count; bird++) {
       const seed = bird * 2.399;
-      let cx = width * ((bird + .5) / count) + Math.sin(t * .65 + seed) * width * .018;
-      let cy = height * (.47 + Math.sin(seed + t * .45) * .16);
+      const column = compact ? (bird < 3 ? (bird + .5) / 3 : (bird - 3 + 1) / 3) : (bird + .5) / count;
+      const row = compact ? (bird < 3 ? .28 : .7) : .47;
+      let cx = width * column + Math.sin(t * .65 + seed) * width * .018;
+      let cy = height * (row + Math.sin(seed + t * .45) * (compact ? .055 : .16));
       const dx = cx - pointerX * width, dy = cy - pointerY * height;
       const distance = Math.hypot(dx, dy);
       const evade = Math.max(0, 1 - distance / 200) * influence;
       cx += dx / Math.max(distance, 1) * evade * 65;
       cy += dy / Math.max(distance, 1) * evade * 45;
-      const size = Math.min(width / count * .78, height * .44, 138) * (.8 + .2 * Math.sin(seed + 1));
+      const size = Math.min(width / (compact ? 3 : count) * .78, height * (compact ? .31 : .44), 138) * (.8 + .2 * Math.sin(seed + 1));
       const flap = .42 + .58 * (.5 + .5 * Math.sin(t * 5 + seed));
       const tilt = Math.sin(t + seed) * .22;
-      for (let layer = 2; layer <= 12; layer++) for (let i = 0; i < 240; i++) {
-        const a = i / 240 * Math.PI * 2;
-        const r = (Math.exp(Math.cos(a)) - 2 * Math.cos(4 * a) - Math.pow(Math.sin(a / 12), 5)) / 4;
-        const x = Math.sin(a) * r * size * flap * layer / 12;
-        const y = -Math.cos(a) * r * size * layer / 12;
-        raster(cx + x * Math.cos(tilt) - y * Math.sin(tilt), cy + x * Math.sin(tilt) + y * Math.cos(tilt), .25 + layer / 23 + .16 * Math.cos(a * 4 + seed));
+      const cosTilt = Math.cos(tilt), sinTilt = Math.sin(tilt);
+      for (let layer = 2; layer <= 12; layer++) for (const point of wingOutline) {
+        const x = point.x * size * flap * layer / 12;
+        const y = point.y * size * layer / 12;
+        raster(cx + x * cosTilt - y * sinTilt, cy + x * sinTilt + y * cosTilt, .25 + layer / 23 + .16 * Math.cos(point.angle + seed));
       }
       for (let y = -size * .3; y < size * .3; y += 3) raster(cx, cy + y, .85);
       for (let a = 0; a < 1; a += .07) for (const side of [-1, 1]) raster(cx + side * a * size * .14, cy - size * (.3 + a * .2), .6);
@@ -82,10 +116,10 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
   }
   function draw(now: number, force = false) {
     lastTime = now;
-    if (!visible && !force) return;
+    if ((!visible || card?.dataset.artCovered === 'true') && !force) return;
     const currentTheme = document.documentElement.dataset.theme || 'dark';
     if (!force && theme === currentTheme && now - lastPaint < 25) return;
-    theme = currentTheme;
+    if (theme !== currentTheme) { theme = currentTheme; makeAtlas(); }
     const dt = Math.min(2, Math.max(.5, (now - lastPaint) / 16.67));
     lastPaint = now;
     const still = reduced.matches;
@@ -130,37 +164,44 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
       }
     }
     ctx.clearRect(0, 0, width, height);
-    ctx.font = `400 ${cell + 1}px "Geist Pixel"`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const colors = theme === 'light'
-      ? ['#403332', '#861c17', '#b5261f', '#070606'] : ['#5e1712', '#f34d40', '#ff8a7e', '#fafaf8'];
-    const glyphs = alphabets[texture];
     const radius = kind === 'flock' ? 90 : Math.min(width * .34, 145);
     const rippleAge = (now - rippleStart) / 1000;
     let touching = false;
+    const moving = !still && (influence > .001 || rippleAge < 2.6);
+    if (!moving && interacting) {
+      offsetsX.fill(0); offsetsY.fill(0); velocityX.fill(0); velocityY.fill(0);
+    }
+    interacting = moving;
+    const damping = Math.pow(.73, dt);
+    const tileSize = atlasSlot / atlasDpr;
     for (let i = 0; i < values.length; i++) {
       const x = (i % columns + .5) * cell, y = (Math.floor(i / columns) + .5) * cell;
-      const dx = x - pointerX * width, dy = y - pointerY * height;
-      const distance = Math.hypot(dx, dy);
-      const near = Math.max(0, 1 - distance / radius) * influence;
-      const force = near * near;
-      const rippleDistance = Math.hypot(x - rippleX * width, y - rippleY * height);
-      const ripple = !still && rippleAge < 1.6 ? Math.sin((rippleDistance - rippleAge * 260) * .055) * Math.exp(-Math.pow((rippleDistance - rippleAge * 260) / 55, 2)) * (1 - rippleAge / 1.6) * 16 : 0;
-      const displacement = force * 55 + ripple;
-      const tx = still ? 0 : dx / Math.max(1, distance) * displacement - dy / Math.max(1, distance) * force * 14;
-      const ty = still ? 0 : dy / Math.max(1, distance) * displacement + dx / Math.max(1, distance) * force * 14;
-      velocityX[i] = (velocityX[i] + (tx - offsetsX[i]) * .12 * dt) * Math.pow(.73, dt);
-      velocityY[i] = (velocityY[i] + (ty - offsetsY[i]) * .12 * dt) * Math.pow(.73, dt);
-      offsetsX[i] += velocityX[i] * dt; offsetsY[i] += velocityY[i] * dt;
-      if (still) { offsetsX[i] = offsetsY[i] = velocityX[i] = velocityY[i] = 0; }
       const value = values[i];
+      if (!moving && value < .12) continue;
+      let near = 0;
+      if (moving) {
+        const dx = x - pointerX * width, dy = y - pointerY * height;
+        const distance = Math.hypot(dx, dy);
+        near = Math.max(0, 1 - distance / radius) * influence;
+        const force = near * near;
+        const rippleDistance = Math.hypot(x - rippleX * width, y - rippleY * height);
+        const ripple = !still && rippleAge < 1.6 ? Math.sin((rippleDistance - rippleAge * 260) * .055) * Math.exp(-Math.pow((rippleDistance - rippleAge * 260) / 55, 2)) * (1 - rippleAge / 1.6) * 16 : 0;
+        const displacement = force * 55 + ripple;
+        const tx = still ? 0 : dx / Math.max(1, distance) * displacement - dy / Math.max(1, distance) * force * 14;
+        const ty = still ? 0 : dy / Math.max(1, distance) * displacement + dx / Math.max(1, distance) * force * 14;
+        velocityX[i] = (velocityX[i] + (tx - offsetsX[i]) * .12 * dt) * damping;
+        velocityY[i] = (velocityY[i] + (ty - offsetsY[i]) * .12 * dt) * damping;
+        offsetsX[i] += velocityX[i] * dt; offsetsY[i] += velocityY[i] * dt;
+      }
       if (value < .12) continue;
       if (near > .25) touching = true;
       const lit = Math.min(.99, value + near * .55);
-      ctx.fillStyle = colors[Math.min(3, Math.floor(lit * 4))];
+      const color = Math.min(3, Math.floor(lit * 4));
       const shimmer = near > .25 && !still ? Math.floor(now * .008 + i * .19) % 3 : 0;
       const glyph = Math.min(7, Math.floor(lit * 7));
-      ctx.fillText(glyphs[1 + (glyph + shimmer) % 7], x + offsetsX[i], y + offsetsY[i]);
+      const character = 1 + (glyph + shimmer) % 7;
+      ctx.drawImage(atlas, character * atlasSlot, color * atlasSlot, atlasSlot, atlasSlot,
+        x + offsetsX[i] - tileSize / 2, y + offsetsY[i] - tileSize / 2, tileSize, tileSize);
     }
     if (touching && motionDistance > 24 && now - lastPluck > 180) {
       onPluck(Math.floor(pointerX * 8)); lastPluck = now; motionDistance = 0;
@@ -179,6 +220,7 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
     if (event.detail) move(event as PointerEvent);
     rippleX = event.detail ? targetX : .5; rippleY = event.detail ? targetY : .5;
     rippleStart = lastTime; targetPhase += .7; texture = (texture + 1) % alphabets.length;
+    makeAtlas();
     draw(lastTime, true);
   }
   host.addEventListener('pointermove', move); host.addEventListener('pointerleave', leave); host.addEventListener('click', reshape);

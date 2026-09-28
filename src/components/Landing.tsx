@@ -58,7 +58,6 @@ export function Landing({ canvasRef }: { canvasRef: RefObject<HTMLCanvasElement 
     </div>
     <div className="ribbon-composition">
       <button className="ribbon-stage" aria-label={site.landing.artLabel}><canvas ref={canvasRef} aria-hidden="true" /></button>
-      <div className="art-caption"><span className="caption-line" /><span>{site.landing.interaction}</span><span className="caption-line" /></div>
     </div>
   </section>;
 }

@@ -1,5 +1,5 @@
 /* Body-only styles. The approved landing composition stays independent. */
-.portfolio-body, .body-contact { --body-panel: color-mix(in srgb,var(--surface) 96%,var(--ink)); --body-border: color-mix(in srgb,var(--ink) 13%,transparent); --body-soft: color-mix(in srgb,var(--surface) 92%,var(--ink)); }
+.portfolio-body, .body-contact { --body-panel: color-mix(in srgb,var(--panel-base) 96%,var(--ink)); --body-border: color-mix(in srgb,var(--ink) 13%,transparent); --body-soft: color-mix(in srgb,var(--panel-base) 92%,var(--ink)); }
 .portfolio-body { max-width: 1536px; margin: auto; }
 .body-section { padding: 115px 5%; }
 .body-section-heading { display: grid; grid-template-columns: 1.3fr .7fr; gap: 7%; align-items: end; margin-bottom: 64px; }
@@ -7,8 +7,7 @@
 .body-section-heading>p { max-width: 345px; margin-bottom: 4px; color: var(--mute); font-size: 17px; }
 .body-text-button { display: inline-flex; gap: 20px; align-items: center; min-height: 44px; padding: 8px 0; font-family: var(--font-sans); font-size: 14px; border-bottom: 1px solid var(--body-border); }
 .body-text-button>span { color: var(--structure); transition: transform 350ms var(--ease); }.body-text-button:hover>span { transform: translate(3px,-3px); }
-.body-brands { padding: 8px 5% 62px; }
-.body-brands-heading { display: flex; align-items: center; justify-content: center; gap: 24px; color: var(--mute); font-size: 13px; margin-bottom: 26px; }
+.body-brands { padding: 0 5% 32px; }
 .body-marquee-window { overflow: hidden; mask-image: linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent); }
 .body-marquee-track { display: flex; width: max-content; animation: body-marquee 48s linear infinite; }
 .body-logo-group { display: flex; align-items: center; justify-content: space-around; min-width: min(100vw,1536px); gap: 72px; padding-right: 72px; }
@@ -53,7 +52,7 @@
 .body-service-stack { position: relative; padding-bottom: 40px; }
 .body-service-card { position: sticky; top: calc(115px + var(--card-index)*12px); min-height: min(590px,72svh); display: grid; grid-template-columns: 1.05fr 1fr; gap: 4%; padding: 52px 5%; margin-bottom: 26svh; border: 1px solid var(--body-border); border-radius: 22px; background: var(--body-panel); box-shadow: 0 -20px 65px #00000016; transform-origin: 50% 0; }
 .body-service-card:last-child { margin-bottom: 0; }
-.body-service-card:nth-child(even) { background: color-mix(in srgb,var(--surface) 94%,#C9362E); }
+.body-service-card:nth-child(even) { background: color-mix(in srgb,var(--panel-base) 94%,#C9362E); }
 .body-service-copy { display: flex; flex-direction: column; align-items: flex-start; position: relative; z-index: 1; }
 .body-service-copy h3 { font-size: clamp(32px,4.2vw,62px); line-height: 1.05; max-width: 460px; margin-bottom: 28px; }
 .body-service-copy>p { color: var(--mute); max-width: 380px; font-size: 16px; }
@@ -83,8 +82,8 @@
 .body-experience details { border-top: 1px solid var(--body-border); }.body-experience details:last-child { border-bottom: 1px solid var(--body-border); }
 .body-experience summary { display: flex; justify-content: space-between; align-items: center; gap: 24px; list-style: none; padding: 24px 0; cursor: pointer; font-size: 16px; }.body-experience summary::-webkit-details-marker { display: none; }.body-experience summary small { display: block; margin-top: 7px; font-size: 12px; color: var(--mute); }.body-experience summary>span:last-child { display: flex; align-items: center; gap: 22px; color: var(--mute); font-size: 12px; white-space: nowrap; }.body-experience summary i { font-style: normal; font-size: 22px; color: var(--structure); transition: transform 300ms; }.body-experience details[open] summary i { transform: rotate(45deg); }.body-experience details>p { color: var(--mute); font-size: 14px; padding: 0 50px 24px 0; max-width: 520px; }
 
-footer.body-contact { position: relative; isolation: isolate; max-width: 1536px; margin: 0 auto 20px; padding: 40px 5% 24px; border: 1px solid var(--body-border); border-radius: 24px; overflow: hidden; background: radial-gradient(ellipse at 50% 30%,#C9362E21,transparent 60%),var(--surface); }
-.body-contact-art { position: relative; height: clamp(260px,30vw,410px); margin: -20px -5% 25px; }
+footer.body-contact { position: relative; isolation: isolate; width: 90%; max-width: none; margin: 0 auto 20px; padding: 40px 0 24px; border: 0; border-radius: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 30%,#C9362E21,transparent 60%),var(--surface); }
+.body-contact-art { position: relative; height: clamp(260px,30vw,410px); margin: -20px 0 25px; }
 .body-contact-art .body-art { height: 100%; min-height: 0; overflow: visible; }.body-contact-art .body-art-hint { bottom: 5px; }
 .body-contact-copy { position: relative; text-align: center; pointer-events: none; }.body-contact-copy>* { pointer-events: auto; }
 .body-contact-copy h2 { color: var(--ink); font-size: clamp(30px,3.8vw,56px); line-height: 1.04; text-shadow: 0 3px 30px var(--surface); }
@@ -100,11 +99,11 @@ footer.body-contact { position: relative; isolation: isolate; max-width: 1536px;
 @media(max-width:899px) { .body-section-heading { grid-template-columns: 1fr; gap: 24px; }.body-section-heading>p { max-width: 440px; }.body-service-card { position: relative; top: auto; min-height: 480px; margin-bottom: 22px; }.body-work-heading { grid-template-columns: 1fr; gap: 24px; }.body-experience { grid-template-columns: 1fr; gap: 35px; margin-top: 65px; }.body-experience-proof>h3 { max-width: none; }.body-service-copy h3 { font-size: 36px; }.body-service-copy>p { font-size: 15px; }.body-service-example { font-size: 11px!important; } }
 @media(max-width:600px) {
  .body-section { padding: 70px 18px; }.body-section-heading { margin-bottom: 36px; }.body-section-heading h2,.body-work-heading h2 { font-size: 36px; }.body-section-heading>p { font-size: 15px; }
- .body-brands { padding: 0 12px 42px; }.body-brands-heading { gap: 18px; font-size: 12px; margin-bottom: 18px; }.body-logo-group { gap: 38px; padding-right: 38px; }.body-logo-group img { width: 140px; height: 56px; }
+ .body-brands { padding: 0 12px 24px; }.body-logo-group { gap: 38px; padding-right: 38px; }.body-logo-group img { width: 140px; height: 56px; }
  .body-work { padding: 45px 12px 15px; }.body-work-heading { display: block; margin-bottom: 30px; }.body-work-heading p { font-size: 14px; margin-top: 20px; }
  .body-service-card { grid-template-columns: 1fr; padding: 30px 22px 20px; border-radius: 18px; }.body-service-copy h3 { font-size: 35px; margin-bottom: 20px; }.body-service-copy>p { font-size: 14px; }.body-skill-pills { margin: 20px 0; gap: 7px; }.body-skill-pills li { font-size: 11px; padding: 8px 12px; }.body-service-copy .body-service-example { padding-top: 0; }.body-art { min-height: 250px; margin-top: 10px; }.body-art-hint { font-size: 10px; }
  .body-about-layout { grid-template-columns: 1fr; gap: 28px; }.body-portrait-wrap { width: 90%; max-width: 350px; }.body-portrait { aspect-ratio: 1; border-radius: 18px; }.body-biography { font-size: 15px; }.body-biography .body-about-intro { font-size: 23px; }.body-biography .body-education { font-size: 12px; }.body-about .body-section-heading { margin-bottom: 36px; }.body-experience summary { font-size: 14px; gap: 12px; }.body-experience summary>span:last-child { font-size: 10px; gap: 10px; }.body-experience summary small { font-size: 11px; }.body-experience-proof>h3 { font-size: 31px; }
- footer.body-contact { padding: 20px 20px 18px; border-radius: 20px; }.body-contact-art { height: 260px; margin: 0 -10px 28px; }.body-contact-copy h2 { font-size: clamp(27px,7vw,36px); }.body-contact-email { font-size: clamp(14px,4.2vw,22px); gap: 9px; }.body-sound-button { font-size: 11px; }
+ footer.body-contact { width: calc(100% - 32px); padding: 20px 0 18px; }.body-contact-art { height: 260px; margin: 0 0 28px; }.body-contact-copy h2 { font-size: clamp(27px,7vw,36px); }.body-contact-email { font-size: clamp(14px,4.2vw,22px); gap: 9px; }.body-sound-button { font-size: 11px; }
 }
 @media(prefers-reduced-motion:reduce) { .body-marquee-track { animation: none; }.body-marquee-window { overflow-x: auto; mask-image: none; }.body-logo-group[aria-hidden=true] { display: none; }.body-service-card { position: relative; top: auto; margin-bottom: 24px; }.portfolio-body *,footer.body-contact * { transition: none!important; } }
 
@@ -144,6 +143,11 @@ footer.body-contact { position: relative; isolation: isolate; max-width: 1536px;
 /* Let the artwork shrink in both dimensions on single-column layouts. */
 @media(max-width:600px) {
  .body-art { min-height: 0; height: auto; aspect-ratio: 1.12; }
- .body-contact-art { height: clamp(150px,44vw,250px); }
+ .body-contact-art { height: clamp(220px,58vw,290px); }
  .body-contact-art .body-art { height: 100%; aspect-ratio: auto; }
 }
+
+:root[data-theme=light] footer.body-contact { background: var(--surface); }
+:root[data-theme=light] .creator-letter { text-shadow: none; }
+/* A cheap opacity overlay supplies stack depth without filtering live canvases. */
+.body-service-card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: #000; opacity: var(--stack-shade,0); pointer-events: none; }

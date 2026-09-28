@@ -27,7 +27,6 @@ function AsciiArtwork({ kind }: { kind: ArtKind }) {
 
 function CompanyMarquee() {
   return <section className="body-brands" aria-label={body.logosTitle}>
-    <div className="body-brands-heading"><p>{body.logosTitle}</p></div>
     <div className="body-marquee-window" tabIndex={0} aria-label={body.logosTitle}><div className="body-marquee-track">{[0, 1].map(copy => <div className="body-logo-group" aria-hidden={copy === 1} key={copy}>{body.logos.map(([name, file]) => <img src={`/logos/${file}`} key={file} alt={copy ? '' : name} width="600" height="200" loading="lazy" />)}</div>)}</div></div>
   </section>;
 }
@@ -137,11 +136,24 @@ function Capabilities() {
       const cards = [...root.current.querySelectorAll<HTMLElement>('.body-service-card')];
       const media = gsap.matchMedia();
       media.add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
-        const triggers = cards.slice(0, -1).map((card, i) => ScrollTrigger.create({ trigger: cards[i + 1], start: 'top 85%', end: 'top 145px', onUpdate: self => {
-          card.style.transform = `scale(${1 - self.progress * .055})`;
-          card.style.filter = `brightness(${1 - self.progress * .25})`;
-        }, onEnter: () => playSound('step', i) }));
-        return () => { triggers.forEach(t => t.kill()); cards.forEach(card => { card.style.transform = ''; card.style.filter = ''; }); };
+        const triggers = cards.slice(0, -1).map((card, i) => {
+          let coverOffset = 0;
+          return ScrollTrigger.create({ trigger: cards[i + 1], start: 'top 85%', end: 'top 145px',
+            onUpdate: self => {
+              card.style.transform = `scale(${1 - self.progress * .055})`;
+              card.style.setProperty('--stack-shade', String(self.progress * .25));
+              card.dataset.artCovered = String(self.scroll() >= self.end - coverOffset);
+            },
+            onRefresh: self => {
+              // Account for the pinned position, final scale and rounded leading edge.
+              const art = card.querySelector<HTMLElement>('.body-art')!;
+              coverOffset = parseFloat(getComputedStyle(card).top) + art.offsetTop * .945 - 24 - 145;
+              card.dataset.artCovered = String(self.scroll() >= self.end - coverOffset);
+            },
+            onEnter: () => playSound('step', i),
+          });
+        });
+        return () => { triggers.forEach(t => t.kill()); cards.forEach(card => { card.style.transform = ''; card.style.removeProperty('--stack-shade'); delete card.dataset.artCovered; }); };
       });
       dispose = () => media.revert();
     });
