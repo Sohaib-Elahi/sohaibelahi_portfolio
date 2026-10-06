@@ -8,10 +8,6 @@ html { scrollbar-gutter: stable; }
 .entrance-square { width: 64px; height: 64px; will-change: transform,opacity; position: absolute; top: 0; left: 0; background: var(--color-red-400); opacity: 0; }
 .entrance-skip { position: absolute; right: 32px; bottom: 28px; min-height: 44px; padding: 10px; font-size: 12px; color: var(--mute); }
 .entrance-skip:hover { color: var(--ink); }
-[data-entry=pending] .landing :is(.identity-line,h1,.landing-description,.landing-actions,.ribbon-composition,.headline-letter) { animation-play-state: paused; }
 @media(max-width:600px) { .entrance-greeting { padding: 16px; }.entrance-greeting>div { font-size: 12vw; }.entrance-skip { right: 16px; bottom: 16px; } }
 @media(prefers-reduced-motion:reduce) { .entrance { display: none; } }
 
-/* WebKit can retain paused per-letter opacity after the intro. Release every
-   entrance effect to its readable base style on completion, skip or timeout. */
-[data-entry=ready] .landing :is(.identity-line,h1,.landing-description,.landing-actions,.ribbon-composition,.headline-letter) { animation: none; }

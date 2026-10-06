@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent, type CSSProperties } fr
 import { body } from '../content/body';
 import { site } from '../content/site';
 import images from '../content/images.json';
-import { createBodyArt, type ArtKind } from '../ascii/body-art';
+import { type ArtKind } from '../ascii/body-art';
 import { playSound } from '../lib/sound';
 import '../body.css';
 import { AnimatedPortrait } from './AnimatedPortrait';
@@ -13,14 +13,19 @@ function AsciiArtwork({ kind }: { kind: ArtKind }) {
   useEffect(() => {
     let cancelled = false;
     let dispose: (() => void) | undefined;
-    void document.fonts.ready.then(async () => {
-      const { subscribeScene } = await import('../lib/scroll');
-      if (cancelled || !canvas.current) return;
-      const art = createBodyArt(canvas.current, kind, note => playSound('hover', note));
-      const unsubscribe = subscribeScene(art.draw);
-      dispose = () => { unsubscribe(); art.dispose(); };
-    });
-    return () => { cancelled = true; dispose?.(); };
+    const near = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      near.disconnect();
+      void document.fonts.ready.then(async () => {
+        const [{ subscribeScene }, { createBodyArt }] = await Promise.all([import('../lib/scroll'), import('../ascii/body-art')]);
+        if (cancelled || !canvas.current) return;
+        const art = createBodyArt(canvas.current, kind, note => playSound('hover', note));
+        const unsubscribe = subscribeScene(art.draw);
+        dispose = () => { unsubscribe(); art.dispose(); };
+      });
+    }, { rootMargin: '160px' });
+    near.observe(canvas.current!);
+    return () => { cancelled = true; near.disconnect(); dispose?.(); };
   }, [kind]);
   return <button className="body-art" aria-label={`${body.artLabel}: ${kind}`} onClick={() => playSound('art', kind.length)}><canvas ref={canvas} aria-hidden="true" /><span className="body-art-hint">{kind === 'flock' ? body.flockHint : body.artHint}</span></button>;
 }
@@ -45,8 +50,8 @@ function WorkGallery() {
         const rect = child.getBoundingClientRect();
         return rect.left < bounds.right - 30 && rect.right > bounds.left + 30 ? [index] : [];
       });
-      setPosition({ first: visible[0] ?? 0, last: visible.at(-1) ?? 0,
-        atEnd: element.scrollLeft >= element.scrollWidth - element.clientWidth - 2 });
+      const next = { first: visible[0] ?? 0, last: visible.at(-1) ?? 0, atEnd: element.scrollLeft >= element.scrollWidth - element.clientWidth - 2 };
+      setPosition(previous => previous.first === next.first && previous.last === next.last && previous.atEnd === next.atEnd ? previous : next);
     }
     element.addEventListener('scroll', update, { passive: true });
     const resize = new ResizeObserver(update);
@@ -117,8 +122,8 @@ function WorkGallery() {
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); step(event.key === 'ArrowRight' ? 1 : -1); }
       if (event.key === 'Home' || event.key === 'End') { event.preventDefault(); goTo(event.key === 'Home' ? 0 : images.length - 1); }
     }}>
-      {images.map((image, i) => <figure className="body-work-image" key={image.src}>
-        <picture><source srcSet={`${image.src}-small.avif 640w, ${image.src}.avif ${image.width}w`} sizes="(max-width: 599px) 80vw, (max-width: 899px) 45vw, 30vw" type="image/avif" /><img src={`${image.src}.webp`} width={image.width} height={image.height} alt={`${site.imageAlt} ${i + 1}`} loading="lazy" decoding="async" /></picture>
+      {images.map((image) => <figure className="body-work-image" key={image.src}>
+        <picture><source srcSet={`${image.src}-small.avif 640w, ${image.src}.avif ${image.width}w`} sizes="(max-width: 599px) 80vw, (max-width: 899px) 45vw, 30vw" type="image/avif" /><img src={`${image.src}.webp`} width={image.width} height={image.height} alt={image.alt} loading="lazy" decoding="async" /></picture>
       </figure>)}
     </div>
     <div className="body-work-hint"><span>{scrollDriven ? "Scroll to explore" : "Swipe through. Stay curious."}</span><a href="#services">Continue to services ↓</a></div>
@@ -137,18 +142,14 @@ function Capabilities() {
       const media = gsap.matchMedia();
       media.add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
         const triggers = cards.slice(0, -1).map((card, i) => {
-          let coverOffset = 0;
           return ScrollTrigger.create({ trigger: cards[i + 1], start: 'top 85%', end: 'top 145px',
             onUpdate: self => {
               card.style.transform = `scale(${1 - self.progress * .055})`;
               card.style.setProperty('--stack-shade', String(self.progress * .25));
-              card.dataset.artCovered = String(self.scroll() >= self.end - coverOffset);
+              card.dataset.artCovered = String(self.progress > .08);
             },
             onRefresh: self => {
-              // Account for the pinned position, final scale and rounded leading edge.
-              const art = card.querySelector<HTMLElement>('.body-art')!;
-              coverOffset = parseFloat(getComputedStyle(card).top) + art.offsetTop * .945 - 24 - 145;
-              card.dataset.artCovered = String(self.scroll() >= self.end - coverOffset);
+              card.dataset.artCovered = String(self.progress > .08);
             },
             onEnter: () => playSound('step', i),
           });

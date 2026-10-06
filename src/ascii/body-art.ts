@@ -9,6 +9,7 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
   const ink = atlas.getContext('2d')!;
   let atlasSlot = 1, atlasDpr = 1;
   let interacting = false;
+  let paintInterval = 50, cosAngle = 1, sinAngle = 0, projectionScale = 1;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let width = 1, height = 1, columns = 1, rows = 1, cell = 7;
   let values = new Float32Array(0);
@@ -76,10 +77,8 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
     values[index] = Math.max(values[index], Math.min(.99, brightness));
   }
   function plot(x: number, y: number, z: number, brightness: number) {
-    const angle = (pointerX - .5) * influence * .6;
-    const scale = Math.min(width, height - 30) * .39;
-    raster(width * .5 + (x * Math.cos(angle) + z * Math.sin(angle)) * scale,
-      (height - 20) * .5 + (y + z * (pointerY - .5) * influence * .4) * scale, brightness);
+    raster(width * .5 + (x * cosAngle + z * sinAngle) * projectionScale,
+      (height - 20) * .5 + (y + z * (pointerY - .5) * influence * .4) * projectionScale, brightness);
   }
   // The wing outline is invariant; keep its expensive trigonometry out of each frame.
   const wingOutline = Array.from({ length: 240 }, (_, i) => {
@@ -118,8 +117,12 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
     lastTime = now;
     if ((!visible || card?.dataset.artCovered === 'true') && !force) return;
     const currentTheme = document.documentElement.dataset.theme || 'dark';
-    if (!force && theme === currentTheme && now - lastPaint < 25) return;
+    if (!force && theme === currentTheme && now - lastPaint < paintInterval) return;
     if (theme !== currentTheme) { theme = currentTheme; makeAtlas(); }
+    const paintStart = performance.now();
+    const angle = (pointerX - .5) * influence * .6;
+    cosAngle = Math.cos(angle); sinAngle = Math.sin(angle);
+    projectionScale = Math.min(width, height - 30) * .39;
     const dt = Math.min(2, Math.max(.5, (now - lastPaint) / 16.67));
     lastPaint = now;
     const still = reduced.matches;
@@ -203,6 +206,7 @@ export function createBodyArt(canvas: HTMLCanvasElement, kind: ArtKind, onPluck:
       ctx.drawImage(atlas, character * atlasSlot, color * atlasSlot, atlasSlot, atlasSlot,
         x + offsetsX[i] - tileSize / 2, y + offsetsY[i] - tileSize / 2, tileSize, tileSize);
     }
+    paintInterval = Math.max(active ? 33 : 50, Math.min(100, (performance.now() - paintStart) * 3));
     if (touching && motionDistance > 24 && now - lastPluck > 180) {
       onPluck(Math.floor(pointerX * 8)); lastPluck = now; motionDistance = 0;
     }

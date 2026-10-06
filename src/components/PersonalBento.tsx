@@ -1,8 +1,23 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { personal } from '../content/personal';
 import { StarIcon, PlaneIcon } from './DecorativeIcons';
 import { playSound } from '../lib/sound';
 import '../personal.css';
+const TextPlayground = lazy(() => import('./TextPlayground'));
+
+
+function TextPlaygroundSlot() {
+  const slot = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setNear(true); observer.disconnect(); }
+    }, { rootMargin: '400px' });
+    observer.observe(slot.current!);
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={slot} style={{ minHeight: 600 }}>{near && <Suspense fallback={null}><TextPlayground /></Suspense>}</div>;
+}
 
 function PakistanClock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -25,21 +40,13 @@ function PakistanClock() {
 
 function Cinema() {
   const [movie, setMovie] = useState(0);
-  function move(event: PointerEvent<HTMLDivElement>) {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty('--scene-x', `${((event.clientX - rect.left) / rect.width - .5) * 18}px`);
-    event.currentTarget.style.setProperty('--scene-y', `${((event.clientY - rect.top) / rect.height - .5) * 12}px`);
-  }
   return <article className="personal-card personal-cinema">
-    <div className={`cinema-scene ${movie ? 'cinema-night' : 'cinema-space'}`} onPointerMove={move} onPointerLeave={event => { event.currentTarget.style.setProperty('--scene-x', '0px'); event.currentTarget.style.setProperty('--scene-y', '0px'); }}>
-      <div className="personal-card-top"><span>Favourite films</span><span aria-hidden="true"><StarIcon /></span></div>
-      <div className="cinema-universe" aria-hidden="true"><div className="cinema-orbit" /><div className="cinema-horizon" />
-        <div className="cinema-stars">{Array.from({ length: 28 }, (_, i) => <i key={i} style={{ left: `${i * 37 % 100}%`, top: `${i * 23 % 80}%`, opacity: .2 + (i % 4) * .2 }} />)}</div>
-      </div>
-      <div className="cinema-title" aria-live="polite"><span>{movie ? 'A little city of stars.' : 'Somewhere beyond the ordinary.'}</span><h3>{personal.movies[movie]}</h3></div>
-    </div>
-    <div className="cinema-switch" role="group" aria-label="Choose a favourite film">{personal.movies.map((title, i) => <button key={title} aria-pressed={movie === i} onClick={() => { setMovie(i); playSound('art', i); }}><span aria-hidden="true">{i ? '✦' : '◌'}</span>{title}</button>)}</div>
+    <div className="personal-card-top"><span>Favourite films</span><StarIcon /></div>
+    <svg className="cinema-art" viewBox="0 0 260 110" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
+      {movie ? <><path d="M155 20a34 34 0 1 0 36 50 32 32 0 0 1-36-50Z" /><path className="art-accent" d="M67 35v10m-5-5h10M207 72v8m-4-4h8M94 84h2" /></> : <><circle cx="130" cy="55" r="37" /><ellipse className="art-accent" cx="130" cy="55" rx="105" ry="9" transform="rotate(-12 130 55)" /><path opacity=".3" d="M25 96h210" /></>}
+    </svg>
+    <h3 aria-live="polite">{personal.movies[movie]}</h3>
+    <div className="cinema-switch" role="group" aria-label="Choose a favourite film">{personal.movies.map((title, i) => <button key={title} aria-pressed={movie === i} onClick={() => { setMovie(i); playSound('art', i); }}>{title}</button>)}</div>
   </article>;
 }
 
@@ -86,8 +93,11 @@ function Travel() {
   const [destination, setDestination] = useState(0);
   return <article className="personal-card personal-travel">
     <div className="personal-card-top"><span>Places I dream of</span><span aria-hidden="true">↗</span></div>
-    <div className={`travel-landmark travel-place-${destination}`} aria-hidden="true"><i /><i /><i /><i /><i /><span /></div>
-    <div className="travel-route"><span>Pakistan</span><span aria-hidden="true">··········· <PlaneIcon /> ···········</span><h3 aria-live="polite">{personal.destinations[destination]}</h3></div>
+    <svg className="travel-landmark" viewBox="0 0 260 130" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">
+      <path opacity=".25" d="M20 112h220" />
+      {destination === 0 ? <><path d="M38 112V75h28v37m130 0V65h24v47M82 112V57h21v55m51 0V46h26v66" opacity=".45" /><path className="art-accent" d="M112 112V78h5V51h6V28h6V8m2 104V28h6v23h6v27h5v34" /></> : destination === 1 ? <><path d="m25 112 52-66 52 66M77 46l15 66m58 0 37-46 38 46" opacity=".45" /><path className="art-accent" d="m82 112 66-90 65 90M148 22l20 90" /></> : <><path d="M38 112V69l9-28 9 28v43m148 0V69l9-28 9 28v43M70 112V62l10-35 10 35v50m80 0V62l10-35 10 35v50" opacity=".45" /><path className="art-accent" d="M101 112V72l12-46 10 46V16l7-12 7 12v56l10-46 12 46v40" /></>}
+    </svg>
+    <div className="travel-route"><span>Pakistan <PlaneIcon /></span><h3 aria-live="polite">{personal.destinations[destination]}</h3></div>
     <div className="travel-choices" role="group" aria-label="Explore dream destinations">{personal.destinations.map((place, i) => <button aria-pressed={destination === i} key={place} onClick={() => { setDestination(i); playSound('tap', i); }}>{place}</button>)}</div>
   </article>;
 }
@@ -134,5 +144,6 @@ export function PersonalBento() {
   return <section id="personal" className="body-section personal-section" aria-labelledby="personal-title">
     <div className="body-section-heading"><h2 id="personal-title">{personal.title}</h2><p>{personal.intro}</p></div>
     <div className="personal-grid"><PakistanClock /><Music /><Cinema /><FavouriteQuote /><Travel /><PixelPad /></div>
+    <TextPlaygroundSlot />
   </section>;
 }

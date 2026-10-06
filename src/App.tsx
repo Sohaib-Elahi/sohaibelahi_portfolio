@@ -25,7 +25,7 @@ export default function App() {
   const [pixelAxis, setPixelAxis] = useState(0);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#070606' : '#FAFAF8');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#000000' : '#FAFAF8');
     try { localStorage.setItem('theme', theme); } catch { /* Storage is optional. */ }
   }, [theme]);
   useEffect(() => {

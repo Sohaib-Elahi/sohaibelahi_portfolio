@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /lab
 Disallow: /type
+Sitemap: https://sohaibelahi-portfolio.vercel.app/sitemap.xml

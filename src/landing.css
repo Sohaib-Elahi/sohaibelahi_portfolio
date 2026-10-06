@@ -77,9 +77,6 @@ header.floating-nav { position: fixed; top: 34px; left: 50%; right: auto; transf
 .hero-grid { position: absolute; inset: 0 48px; z-index: -1; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(25% - 1px), color-mix(in srgb, var(--ink) 4%, transparent) calc(25% - 1px), color-mix(in srgb, var(--ink) 4%, transparent) 25%); mask-image: linear-gradient(#000, transparent 42%, #000); }
 .hero-coordinate { position: absolute; left: 32px; top: 45px; color: var(--mute); font-size: 10px; letter-spacing: .12em; writing-mode: vertical-rl; }
 .landing::after { content: ''; position: absolute; z-index: -1; width: 70%; height: 30%; left: 15%; bottom: 13%; background: radial-gradient(ellipse, #C9362E15, transparent 68%); filter: blur(35px); pointer-events: none; animation: atmosphere 9s ease-in-out infinite alternate; }
-.headline-word { display: inline-block; white-space: pre; }
-.headline-letter { display: inline-block; --energy: 0; transform: translateY(calc(var(--energy) * -5px)); filter: brightness(calc(1 + var(--energy) * .5)); text-shadow: 0 0 calc(var(--energy) * 28px) color-mix(in srgb, var(--color-red-400) 70%, transparent); font-variation-settings: 'ELSH' calc(30 + var(--energy) * 70); transition: transform 180ms ease-out, filter 180ms, text-shadow 180ms; }
-.pixel-line .headline-letter { font-variation-settings: 'ELSH' calc(50 + var(--energy) * 50); }
 .art-note { position: absolute; top: 20px; display: flex; gap: 10px; align-items: center; font-size: 9px; letter-spacing: .15em; color: var(--mute); pointer-events: none; }
 .art-note-left { left: 2%; }.art-note-right { right: 2%; }.art-note i { width: 25px; height: 1px; background: var(--hair); }
 .primary-cta { position: relative; overflow: hidden; font-family: var(--font-display); background: linear-gradient(135deg, #e44b3e, #b72420); }
@@ -90,11 +87,6 @@ header.floating-nav { position: fixed; top: 34px; left: 50%; right: auto; transf
 .floating-nav nav a::after { content: ''; position: absolute; bottom: 5px; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--color-red-400); transform: translate(-50%, 5px) scale(0); transition: transform 250ms var(--ease); }
 .nav-preferences { border-left: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); padding-left: 12px; }
 .identity-mark { animation: mark-turn 18s linear infinite; }
-@media (prefers-reduced-motion: no-preference) {
-  .identity-line, .landing h1, .landing-description, .landing-actions, .ribbon-composition { animation: hero-arrive 900ms var(--ease) both; }
-  .landing h1 { animation-delay: 90ms; }.landing-description { animation-delay: 180ms; }.landing-actions { animation-delay: 260ms; }.ribbon-composition { animation-delay: 330ms; animation-duration: 1200ms; }
-}
-@keyframes hero-arrive { from { opacity: 0; transform: translateY(22px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 @keyframes atmosphere { to { transform: scale(1.2) translateY(-10%); opacity: .5; } }
 @keyframes mark-turn { to { transform: rotate(360deg); } }
 @media (hover:hover) {
@@ -109,7 +101,7 @@ header.floating-nav { position: fixed; top: 34px; left: 50%; right: auto; transf
   .ribbon-stage { height: 275px; }.art-note { top: 0; font-size: 7px; gap: 6px; }.art-note i { width: 14px; }
   .nav-preferences { padding-left: 4px; }.primary-cta { gap: 16px; }
 }
-@media (prefers-reduced-motion: reduce) { .identity-mark, .landing::after { animation: none; }.headline-letter, .primary-cta::before, .primary-cta span, .secondary-cta span, .floating-nav nav a::after { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .identity-mark, .landing::after { animation: none; }.primary-cta::before, .primary-cta span, .secondary-cta span, .floating-nav nav a::after { transition: none; } }
 
 .hero-grid { inset: 0; background: none; mask-image: none; overflow: hidden; }
 .power-line { position: absolute; display: block; background: #ffffff07; }
@@ -155,13 +147,6 @@ header.floating-nav { position: fixed; top: 34px; left: 50%; right: auto; transf
 }
 @media(prefers-reduced-motion:reduce) { .identity-mark,.primary-cta,.landing-bottom a span,.nav-preferences button { transition: none; } }
 
-@media(prefers-reduced-motion:no-preference) {
- .landing .headline-letter { animation: headline-type 100ms steps(1,end) both; animation-delay: calc(450ms + var(--letter-order)*28ms); }
-}
-@keyframes headline-type { from { opacity: 0; } to { opacity: 1; } }
-/* Touch/narrow screens reveal the complete headline without staggered letters. */
-@media(max-width:700px),(hover:none),(pointer:coarse) { .landing h1,.landing .headline-letter { animation: none; } }
-
 /* Keep the copy clear, but let the light-theme loop retain a solid silhouette. */
 :root[data-theme=light] .ribbon-stage canvas { mask-image: radial-gradient(ellipse 48% 58% at 50% 46%,transparent 30%,#000 72%); }
 @media(max-width:600px) { :root[data-theme=light] .ribbon-stage canvas { mask-image: radial-gradient(ellipse 68% 48% at 50% 44%,transparent 36%,#000 78%); } }
@@ -182,7 +167,7 @@ header.floating-nav { position: fixed; top: 34px; left: 50%; right: auto; transf
 :root[data-theme=light] .landing { background: var(--surface); }
 :root[data-theme=light] .landing::after { display: none; }
 :root[data-theme=light] .primary-cta { box-shadow: inset 0 1px 0 #ffffff40; }
-:root[data-theme=light] .headline-letter { text-shadow: none; }
+
 @media(min-width:1600px) {
  .landing { min-height: clamp(840px,50vw,1200px); }
 }

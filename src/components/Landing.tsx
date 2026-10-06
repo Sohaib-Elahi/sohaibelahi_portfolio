@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type RefObject, type PointerEvent } from 'react';
 import { site } from '../content/site';
 import { StarIcon } from './DecorativeIcons';
 
@@ -28,21 +28,6 @@ export function Navigation({ preferences }: { preferences: ReactNode }) {
   </header>;
 }
 
-function InteractiveHeadline() {
-  function illuminate(event: PointerEvent<HTMLHeadingElement>) {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    for (const letter of event.currentTarget.querySelectorAll<HTMLElement>('.headline-letter')) {
-      const rect = letter.getBoundingClientRect();
-      const distance = Math.hypot(event.clientX - rect.left - rect.width / 2, event.clientY - rect.top - rect.height / 2);
-      const energy = Math.max(0, 1 - distance / 150);
-      letter.style.setProperty('--energy', String(energy));
-    }
-  }
-  return <h1 id="landing-title" aria-label={site.headline.join(' ')} onPointerMove={illuminate} onPointerLeave={event => {
-    event.currentTarget.querySelectorAll<HTMLElement>('.headline-letter').forEach(letter => letter.style.removeProperty('--energy'));
-  }}>{site.headline.map((line, index) => <span key={line} className={index ? 'pixel-line' : 'headline-line'} aria-hidden="true">{line.split(' ').map((word, i) => <span className="headline-word" key={i}>{[...word].map((letter, j) => <span className="headline-letter" style={{ '--letter-order': site.headline.slice(0, index).join(' ').length + line.split(' ').slice(0, i).join(' ').length + i + j } as CSSProperties} key={j}>{letter}</span>)}{' '}</span>)}</span>)}</h1>;
-}
-
 export function Landing({ canvasRef }: { canvasRef: RefObject<HTMLCanvasElement | null> }) {
   function magnet(event: PointerEvent<HTMLAnchorElement>) {
     if (event.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -53,7 +38,7 @@ export function Landing({ canvasRef }: { canvasRef: RefObject<HTMLCanvasElement 
     <div className="hero-grid" aria-hidden="true">{[0, 1, 2, 3].map(i => <span className={`power-line power-vertical line-${i}`} key={`v${i}`} />)}{[0, 1, 2].map(i => <span className={`power-line power-horizontal line-${i}`} key={`h${i}`} />)}</div>
     <div className="landing-heading">
       <div className="identity-line"><span className="identity-mark" aria-hidden="true"><StarIcon /></span><span>{site.fullName}<span className="identity-divider">/</span>{site.landing.identity}</span></div>
-      <InteractiveHeadline />
+      <h1 id="landing-title">{site.headline.map((line, i) => <span className={i ? 'pixel-line' : 'headline-line'} key={line}>{line}</span>)}</h1>
       <p className="landing-description">{site.landing.description}</p>
       <div className="landing-actions"><a className="primary-cta" onPointerMove={magnet} onPointerLeave={event => { event.currentTarget.style.translate = ''; }} href={`mailto:${site.email}`}>{site.landing.contact}<span aria-hidden="true">↗</span></a><a className="secondary-cta" href="#work">{site.landing.work}<span aria-hidden="true">↓</span></a></div>
     </div>

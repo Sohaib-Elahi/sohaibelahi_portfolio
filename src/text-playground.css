@@ -1,0 +1,30 @@
+.text-playground { margin-top: 72px; border-top: 1px solid var(--body-border); padding-top: 38px; }
+.text-playground>h3 { font-size: clamp(28px,3vw,42px); color: var(--ink); }
+.text-art-stage { margin: 18px -2%; }
+.text-art-stage canvas { width: 100%; aspect-ratio: 10/3; display: block; }
+.text-playground-form { display: flex; align-items: end; gap: 40px; }
+.text-input { flex: 1; min-width: 0; display: flex; align-items: center; border-bottom: 1px solid var(--body-border); padding-bottom: 10px; }
+.text-input input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font-size: 22px; padding: 6px 0; }
+.text-playground-actions { display: flex; gap: 28px; flex: none; }
+.text-playground .body-text-button { margin: 0; padding: 10px 0; min-height: 44px; font-size: 13px; }
+.text-playground button:disabled { opacity: .4; cursor: default; }
+.text-playground-note { margin-top: 14px; font-size: 11px; color: var(--mute); min-height: 24px; display: flex; justify-content: space-between; gap: 20px; }
+.text-playground-note [role=status] { color: var(--ink); padding-top: 0; }
+.visitor-collection { margin-top: 24px; }
+.collection-controls { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.collection-controls button { width: 44px; height: 44px; font-size: 20px; color: var(--mute); }
+.collection-controls button:hover { color: var(--ink); }
+.collection-controls .body-text-button { margin-right: auto; border: 0; font-size: 20px; }
+.visitor-notes { display: flex; gap: 28px; height: 150px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: var(--body-border) transparent; border-top: 1px solid var(--body-border); }
+.visitor-note { flex: 0 0 clamp(230px,30%,360px); min-width: 0; height: 136px; padding: 20px 0 8px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; }
+.visitor-note-text { font-family: var(--font-display); font-size: clamp(23px,2.5vw,35px); line-height: 1.15; text-align: left; overflow-wrap: anywhere; color: var(--ink); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.visitor-note-text:hover { color: var(--color-red-400); }
+.visitor-note-remove { color: var(--mute); font-size: 11px; min-height: 36px; }
+.visitor-note-more { justify-content: center; }
+.collection-empty { align-self: center; font-size: 13px; color: var(--mute); }
+@media(max-width:700px) {
+ .text-playground { margin-top: 48px; padding-top: 28px; }
+ .text-art-stage { margin: 12px -3%; }.text-art-stage canvas { aspect-ratio: 10/4; object-fit: contain; }
+ .text-playground-form { flex-direction: column; align-items: stretch; gap: 16px; }.text-input input { font-size: 20px; }.text-playground-actions { justify-content: space-between; }
+ .visitor-notes { gap: 24px; }.visitor-note { flex-basis: 78%; }
+}

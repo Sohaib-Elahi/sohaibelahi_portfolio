@@ -2,6 +2,7 @@ from pathlib import Path
 from PIL import Image
 import hashlib,json
 root=Path(__file__).resolve().parents[1]
+existing={row['src']:row.get('alt','') for row in json.loads((root/'src/content/images.json').read_text())}
 seen={}; rows=[]; gallery=[]
 for path in sorted((root/'raw').rglob('*')):
  if path.suffix.lower() not in ('.png','.webp','.jpg','.jpeg'): continue
@@ -20,7 +21,7 @@ for path in sorted((root/'raw').rglob('*')):
   small=im.resize((min(im.width,640),round(im.height*min(im.width,640)/im.width)),Image.Resampling.LANCZOS)
   small.save(root/f'public/images/{stem}-small.avif',quality=58)
   small.save(root/f'public/images/{stem}-small.webp',quality=78,method=6)
-  if stem!='portrait': gallery.append({'src':f'/images/{stem}','width':im.width,'height':im.height})
+  if stem!='portrait': gallery.append({'src':f'/images/{stem}','width':im.width,'height':im.height,'alt':existing.get(f'/images/{stem}','')})
 # Portrait may be a duplicate encountered earlier; create explicitly.
 with Image.open(root/'raw/portrait/me.webp') as im:
  im=im.convert('RGB'); im.thumbnail((1000,1000))
